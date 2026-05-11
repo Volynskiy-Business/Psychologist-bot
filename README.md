@@ -172,6 +172,15 @@ The bot uses approaches recommended by:
 
 Pull requests welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## 💝 Support
+
+This project is free, but servers aren't. [Support us](DONATIONS.md) to keep the bot running!
+
+## 🚀 Deploy for Free
+
+Deploy in the cloud for free — no need to keep your PC running:
+[Free Deployment Guide](DEPLOYMENT.md)
+
 ## 📄 License
 
 [MIT License](LICENSE) © 2026
