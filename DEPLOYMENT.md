@@ -2,157 +2,174 @@
 
 Deploy PsySupport AI Bot for **free** in the cloud. No need to keep your computer running 24/7.
 
-## Recommended Free Options
+## 🥇 Recommended: Oracle Cloud Always Free
 
-### 1. 🥇 Oracle Cloud (Always Free) — BEST
-**Resources:** 2 AMD instances + 4 ARM cores + 24GB RAM + 200GB storage
+**Best for**: Production, 24/7 operation, full control
 
+### What You Get (Free Forever)
+- 2 AMD-based Compute VMs (1/8 OCPU, 1 GB RAM each)
+- 4 ARM-based Compute VMs (up to 24 GB RAM total)
+- 200 GB block storage
+- No credit card required
+
+### Setup Instructions
+
+#### Step 1: Create Oracle Cloud Account
+1. Go to https://www.oracle.com/cloud/free/
+2. Sign up (requires phone verification)
+3. Wait for account activation (usually instant)
+
+#### Step 2: Create VM Instance
+1. Go to Compute → Instances → Create Instance
+2. Name: `psy-support-bot`
+3. Image: Ubuntu 22.04
+4. Shape: VM.Standard.A1.Flex (ARM)
+   - OCPUs: 1
+   - Memory: 6 GB (recommended) or 4 GB (minimum)
+5. Add SSH key (generate new or upload existing)
+6. Create
+
+#### Step 3: Connect and Setup
 ```bash
-# 1. Sign up: https://www.oracle.com/cloud/free/
-# 2. Create VM: Ubuntu 22.04, 1 OCPU, 1GB RAM
-# 3. Connect via SSH
-# 4. Install Docker
-sudo apt update && sudo apt install -y docker.io docker-compose
+# Connect via SSH
+ssh ubuntu@YOUR_VM_IP
 
-# 5. Clone and run
-git clone https://github.com/Volynskiy-Business/Psychologist-bot.git
-cd Psychologist-bot
-cp .env.example .env
-# Edit .env with your keys
-sudo docker-compose up -d
+# Download and run setup script
+curl -fsSL https://raw.githubusercontent.com/Volynskiy-Business/Psychologist-bot/main/oracle-cloud-setup.sh | bash
+
+# Edit environment variables
+nano ~/psy-support-bot/.env
+# Add your real API keys:
+# BOT_TOKEN=your_telegram_token
+# OPENROUTER_API_KEY=your_openrouter_key
+
+# Start the bot
+cd ~/psy-support-bot
+docker compose -f docker-compose.oracle.yml up -d
+
+# Check logs
+docker compose -f docker-compose.oracle.yml logs -f bot
 ```
 
-**Pros:**
-- ✅ Truly free forever
-- ✅ Powerful (up to 4 ARM cores)
-- ✅ No credit card needed
-- ✅ Custom domain support
+#### Step 4: Enable Monitoring (Optional)
+```bash
+# Start with Prometheus + Grafana
+docker compose -f docker-compose.oracle.yml --profile monitoring up -d
 
-**Cons:**
-- ⚠️ Requires verification
-- ⚠️ Account may be reviewed
+# Access Grafana
+# URL: http://YOUR_VM_IP:3000
+# Login: admin / admin
+```
+
+#### Step 5: Configure Firewall
+1. Go to Networking → Virtual Cloud Networks
+2. Click your VCN → Security Lists
+3. Add Ingress Rules:
+   - Port 22 (SSH): 0.0.0.0/0
+   - Port 3000 (Grafana): Your IP only
+   - Port 9090 (Prometheus): Your IP only
+   - Port 8000 (Metrics): Your IP only
+
+### Maintenance
+```bash
+# Update bot
+cd ~/psy-support-bot
+git pull
+docker compose -f docker-compose.oracle.yml up -d --build
+
+# View logs
+docker compose -f docker-compose.oracle.yml logs -f bot
+
+# Backup database
+docker compose -f docker-compose.oracle.yml exec postgres pg_dump -U postgres psybot > backup.sql
+
+# Check resources
+docker stats
+```
 
 ---
 
-### 2. 🥈 Render (Free Tier)
-**Resources:** Web service + PostgreSQL
+## 🥈 Alternative: Render (Free Tier)
+
+**Best for**: Quick testing, simple setup
+
+**Limitations**: Sleeps after 15 min inactivity
 
 ```bash
 # 1. Sign up: https://render.com
-# 2. Create Web Service
-# 3. Connect GitHub repo
-# 4. Set environment variables
-# 5. Deploy
+# 2. New Web Service → Connect GitHub repo
+# 3. Set environment variables in dashboard
+# 4. Deploy
 ```
-
-**Pros:**
-- ✅ Simplest setup
-- ✅ Auto-deploy from GitHub
-- ✅ Free PostgreSQL
-- ✅ HTTPS included
-
-**Cons:**
-- ⚠️ Sleeps after 15 min inactivity
-- ⚠️ Limited resources
 
 ---
 
-### 3. 🥉 Railway
-**Resources:** $5/month free credit
+## 🥉 Alternative: Railway
+
+**Best for**: Small projects, easy scaling
+
+**Limitations**: $5/month free credit (may need paid for 24/7)
 
 ```bash
 # 1. Sign up: https://railway.app
 # 2. New Project → Deploy from GitHub
-# 3. Add PostgreSQL + Redis
+# 3. Add PostgreSQL + Redis plugins
 # 4. Set env variables
 # 5. Deploy
 ```
-
-**Pros:**
-- ✅ Easy to use
-- ✅ Good for testing
-- ✅ Auto-scaling
-
-**Cons:**
-- ⚠️ $5/month limit (may need paid)
-- ⚠️ Sleep mode possible
-
----
-
-### 4. Fly.io (Free Tier)
-**Resources:** 3 shared-cpu-1x VMs
-
-```bash
-# 1. Install flyctl
-curl -L https://fly.io/install.sh | sh
-
-# 2. Sign up: fly auth signup
-# 3. Launch: fly launch
-# 4. Set secrets: fly secrets set BOT_TOKEN=xxx OPENROUTER_API_KEY=xxx
-# 5. Deploy: fly deploy
-```
-
-**Pros:**
-- ✅ Generous free tier
-- ✅ Global CDN
-- ✅ Easy CLI
-
-**Cons:**
-- ⚠️ Requires credit card (not charged)
-- ⚠️ Limited resources
-
----
-
-### 5. Google Cloud Run (Free Tier)
-**Resources:** 2 million requests/month
-
-```bash
-# 1. Sign up: https://cloud.google.com/free
-# 2. Enable Cloud Run API
-# 3. Deploy container
-gcloud run deploy psy-support-bot \
-  --source . \
-  --set-env-vars BOT_TOKEN=xxx,OPENROUTER_API_KEY=xxx
-```
-
-**Pros:**
-- ✅ Serverless (pay per use)
-- ✅ Auto-scaling
-- ✅ Generous free tier
-
-**Cons:**
-- ⚠️ Complex setup
-- ⚠️ Requires GCP knowledge
 
 ---
 
 ## Comparison Table
 
-| Platform | Free Tier | Always On | Ease | Best For |
-|----------|-----------|-----------|------|----------|
-| Oracle Cloud | ✅ Forever | ✅ Yes | Medium | Production |
-| Render | ✅ Limited | ❌ Sleeps | Easy | Testing |
-| Railway | ✅ $5/mo | ⚠️ Maybe | Easy | Small projects |
-| Fly.io | ✅ 3 VMs | ✅ Yes | Easy | Global deploy |
-| GCP Run | ✅ 2M req | ✅ Yes | Hard | Serverless |
+| Platform | Free Tier | Always On | Resources | Ease | Best For |
+|----------|-----------|-----------|-----------|------|----------|
+| **Oracle Cloud** | ✅ Forever | ✅ Yes | 4 ARM cores + 24GB | Medium | **Production** |
+| Render | ✅ Limited | ❌ Sleeps | 512MB RAM | Easy | Testing |
+| Railway | ✅ $5/mo | ⚠️ Maybe | Flexible | Easy | Small projects |
+| Fly.io | ✅ 3 VMs | ✅ Yes | Shared CPU | Medium | Global deploy |
 
-## Quick Start (Recommended)
+---
 
-**For beginners:** Render or Railway
-**For production:** Oracle Cloud
-**For global reach:** Fly.io
+## Troubleshooting
 
-## Monitoring
+### Bot not responding
+```bash
+# Check if container is running
+docker ps
 
-All platforms support:
-- Logs viewing
-- Health checks
-- Auto-restart
-- Alerts
+# Check logs
+docker compose logs bot
+
+# Restart
+docker compose restart bot
+```
+
+### Database connection error
+```bash
+# Check PostgreSQL
+docker compose logs postgres
+
+# Reset database (WARNING: data loss)
+docker compose down -v
+docker compose up -d
+```
+
+### Out of memory
+```bash
+# Check memory usage
+free -h
+
+# Reduce memory limits in docker-compose.oracle.yml
+# Or upgrade to paid tier
+```
+
+---
 
 ## Need Help?
 
-Open an issue: https://github.com/Volynskiy-Business/Psychologist-bot/issues
+- Open an issue: https://github.com/Volynskiy-Business/Psychologist-bot/issues
+- Telegram: @psy_support_bot
 
 ---
 
