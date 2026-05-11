@@ -1,0 +1,14 @@
+# Copy this file to terraform.tfvars and fill in your values
+# NEVER commit terraform.tfvars to git!
+
+tenancy_ocid     = "ocid1.tenancy.oc1..xxxxxxxx"
+user_ocid        = "ocid1.user.oc1..xxxxxxxx"
+fingerprint      = "xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx"
+private_key_path = "~/.oci/oci_api_key.pem"
+region           = "eu-frankfurt-1"
+compartment_ocid = "ocid1.compartment.oc1..xxxxxxxx"
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"
+
+# Bot configuration (will be injected into the VM)
+bot_token          = "your_telegram_bot_token"
+openrouter_api_key = "your_openrouter_api_key"

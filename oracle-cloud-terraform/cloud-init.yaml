@@ -1,0 +1,54 @@
+#cloud-config
+package_update: true
+packages:
+  - docker.io
+  - docker-compose
+  - git
+  - curl
+
+runcmd:
+  - systemctl enable docker
+  - systemctl start docker
+  - usermod -aG docker ubuntu
+  
+  # Clone repository
+  - cd /home/ubuntu
+  - git clone https://github.com/Volynskiy-Business/Psychologist-bot.git psy-support-bot
+  - cd psy-support-bot
+  
+  # Create .env file
+  - |
+    cat > .env << 'ENVEOF'
+    BOT_TOKEN=${bot_token}
+    OPENROUTER_API_KEY=${openrouter_api_key}
+    BOT_DISPLAY_NAME=PsySupport AI
+    OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+    DEFAULT_MODEL=openrouter/free
+    DATABASE_URL=sqlite:///./data/psybot.db
+    REDIS_URL=redis://redis:6379/0
+    ADMIN_TELEGRAM_IDS=
+    STORE_CONVERSATIONS=false
+    MESSAGE_RETENTION_DAYS=30
+    SAFETY_EVENT_RETENTION_DAYS=180
+    APP_ENV=production
+    LOG_LEVEL=INFO
+    ENVEOF
+  
+  # Create data directory
+  - mkdir -p data
+  
+  # Start services
+  - docker compose -f docker-compose.oracle.yml up -d
+  
+  # Setup auto-update cron job
+  - |
+    cat > /home/ubuntu/update-bot.sh << 'EOF'
+    #!/bin/bash
+    cd /home/ubuntu/psy-support-bot
+    git pull
+    docker compose -f docker-compose.oracle.yml up -d --build
+    EOF
+  - chmod +x /home/ubuntu/update-bot.sh
+  - echo "0 4 * * * /home/ubuntu/update-bot.sh >> /var/log/bot-update.log 2>&1" | crontab -
+
+final_message: "PsySupport AI Bot setup complete!"
