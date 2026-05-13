@@ -1,16 +1,19 @@
 """Main chat handler with safety checks."""
 
+import logging
+
 from aiogram import Router, types
 from aiogram.filters import Command
 
 from app.ai.openrouter_client import OpenRouterClient
+from app.ai.prompts.system_prompt import SYSTEM_PROMPT
 from app.bot.handlers.i18n import get_text, get_user_language
-from app.config import settings
 from app.db.models import RiskLevel
 from app.safety.crisis_detector import deterministic_crisis_check
 from app.safety.safety_classifier import SafetyClassifier
 from app.safety.safety_protocols import get_crisis_response
 
+logger = logging.getLogger(__name__)
 router = Router()
 
 
@@ -46,8 +49,10 @@ async def handle_message(message: types.Message) -> None:
             await client.close()
             return
     except Exception:
-        # If classifier fails, continue with normal flow but be cautious
-        pass
+        logger.exception("Safety classifier failed; failing closed")
+        await message.answer(get_text("chat.error", lang))
+        await client.close()
+        return
 
     # Step 3: Normal support flow
     await message.chat.do_action("typing")
@@ -55,7 +60,7 @@ async def handle_message(message: types.Message) -> None:
     try:
         response = await client.chat_completion(
             messages=[
-                {"role": "system", "content": settings.default_model},
+                {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_text},
             ],
             temperature=0.4,
