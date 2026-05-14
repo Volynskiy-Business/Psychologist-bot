@@ -59,3 +59,6 @@ alembic.ini
 *.pem
 *.key
 secrets/
+
+# Claude Code per-user overrides
+.claude/settings.local.json
