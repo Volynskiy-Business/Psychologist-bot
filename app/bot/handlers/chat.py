@@ -4,8 +4,8 @@ from aiogram import Router, types
 from aiogram.filters import Command
 
 from app.ai.openrouter_client import OpenRouterClient
+from app.ai.prompts.system_prompt import SYSTEM_PROMPT
 from app.bot.handlers.i18n import get_text, get_user_language
-from app.config import settings
 from app.db.models import RiskLevel
 from app.safety.crisis_detector import deterministic_crisis_check
 from app.safety.safety_classifier import SafetyClassifier
@@ -55,14 +55,14 @@ async def handle_message(message: types.Message) -> None:
     try:
         response = await client.chat_completion(
             messages=[
-                {"role": "system", "content": settings.default_model},
+                {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_text},
             ],
             temperature=0.4,
             max_tokens=700,
         )
         await message.answer(response.content)
-    except Exception as e:
+    except Exception:
         await message.answer(get_text("chat.error", lang))
     finally:
         await client.close()
