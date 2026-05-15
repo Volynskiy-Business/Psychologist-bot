@@ -1,6 +1,6 @@
 """Tests for user_service — upsert, consent persistence, and DB-backed consent check."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -188,9 +188,9 @@ def _seed_user(tg_id: int, pk: int = 1) -> User:
         telegram_id=tg_id,
         language="en",
         consent_given=True,
-        consent_accepted_at=datetime.utcnow(),
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
+        consent_accepted_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        updated_at=datetime.now(timezone.utc).replace(tzinfo=None),
     )
 
 
@@ -204,7 +204,7 @@ def _seed_safety_event(user_id, tg_id: int) -> SafetyEvent:
         reason="keyword",
         requires_crisis_response=True,
         requires_professional_referral=False,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc).replace(tzinfo=None),
     )
 
 
@@ -221,11 +221,11 @@ async def test_delete_clears_all_identifiers_and_retains_safety_event() -> None:
 
             session.add(MoodEntry(
                 user_id=user.id, mood_score=3, anxiety_score=5,
-                energy_score=5, created_at=datetime.utcnow(),
+                energy_score=5, created_at=datetime.now(timezone.utc).replace(tzinfo=None),
             ))
             session.add(Message(
                 user_id=user.id, role="user",
-                content="hello", created_at=datetime.utcnow(),
+                content="hello", created_at=datetime.now(timezone.utc).replace(tzinfo=None),
             ))
             session.add(_seed_safety_event(user.id, _TEST_TG_ID))
             await session.commit()

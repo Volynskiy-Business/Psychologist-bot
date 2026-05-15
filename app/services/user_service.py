@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import delete, or_, select, update
@@ -7,6 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Message, MoodEntry, RiskLevel, SafetyEvent, User
 from app.db.session import AsyncSessionLocal
+
+
+def _utc_now_naive() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class DeleteUserDataResult(enum.Enum):
@@ -30,8 +34,8 @@ async def upsert_user(
             username=username,
             first_name=first_name,
             language=language,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
+            created_at=_utc_now_naive(),
+            updated_at=_utc_now_naive(),
         )
         session.add(user)
         await session.flush()
@@ -39,7 +43,7 @@ async def upsert_user(
         user.username = username
         user.first_name = first_name
         user.language = language
-        user.updated_at = datetime.utcnow()
+        user.updated_at = _utc_now_naive()
     return user
 
 
@@ -60,7 +64,7 @@ async def grant_consent(
         )
         user.consent_given = True
         if user.consent_accepted_at is None:  # preserve first acceptance timestamp
-            user.consent_accepted_at = datetime.utcnow()
+            user.consent_accepted_at = _utc_now_naive()
         await session.commit()
 
 
@@ -80,7 +84,7 @@ async def save_mood_entry(telegram_id: int, mood_score: int) -> None:
             mood_score=mood_score,
             anxiety_score=5,
             energy_score=5,
-            created_at=datetime.utcnow(),
+            created_at=_utc_now_naive(),
         )
         session.add(entry)
         await session.commit()
@@ -119,7 +123,7 @@ async def record_safety_event(
             reason=matched_pattern or "",
             requires_crisis_response=True,
             requires_professional_referral=(risk_level >= RiskLevel.IMMINENT_RISK),
-            created_at=datetime.utcnow(),
+            created_at=_utc_now_naive(),
         )
         session.add(event)
         await session.commit()
