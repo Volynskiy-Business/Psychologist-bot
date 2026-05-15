@@ -1,4 +1,3 @@
-version: "3.8"
 
 services:
   bot:
@@ -22,16 +21,16 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: psy-support-postgres
+    container_name: psysupport-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: psybot
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: psysupport_user
+      POSTGRES_PASSWORD: K9d8r7m6b5L4v3x2Z1c0n9M8
+      POSTGRES_DB: psysupport
     ports:
-      - "5432:5432"
+      - "5433:5432"
+    volumes:
+      - psysupport_postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
@@ -68,6 +67,7 @@ services:
 
 volumes:
   postgres_data:
+  psysupport_postgres_data:
   redis_data:
   prometheus_data:
   grafana_data:

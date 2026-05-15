@@ -1,7 +1,5 @@
 """Application configuration using Pydantic Settings."""
 
-from pathlib import Path
-
 from pydantic import Field, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -22,7 +20,7 @@ class Settings(BaseSettings):
     openrouter_base_url: str = Field(
         "https://openrouter.ai/api/v1", alias="OPENROUTER_BASE_URL"
     )
-    default_model: str = Field("openrouter/free", alias="DEFAULT_MODEL")
+    default_model: str = Field("openrouter/free", alias="OPENROUTER_MODEL")
 
     # Database
     database_url: SecretStr = Field(..., alias="DATABASE_URL")

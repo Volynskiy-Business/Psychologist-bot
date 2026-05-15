@@ -31,6 +31,7 @@ class User(Base):
     region: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     style_preference: Mapped[str] = mapped_column(String(32), default="soft")
     consent_given: Mapped[bool] = mapped_column(default=False)
+    consent_accepted_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
@@ -77,16 +78,17 @@ class SafetyEvent(Base):
     __tablename__ = "safety_events"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    user_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey("users.id"), index=True, nullable=True)
+    telegram_user_id: Mapped[int] = mapped_column(BigInteger, index=True)
     risk_level: Mapped[RiskLevel] = mapped_column(Enum(RiskLevel))
     risk_type: Mapped[str] = mapped_column(String(64))
     confidence: Mapped[float] = mapped_column(Float)
     reason: Mapped[str] = mapped_column(Text)
     requires_crisis_response: Mapped[bool] = mapped_column(default=False)
     requires_professional_referral: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 
-    user: Mapped["User"] = relationship(back_populates="safety_events")
+    user: Mapped[Optional["User"]] = relationship(back_populates="safety_events")
 
 
 class Feedback(Base):
