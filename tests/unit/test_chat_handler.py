@@ -57,8 +57,7 @@ async def test_classifier_failure_does_not_proceed_to_llm() -> None:
 
 @pytest.mark.asyncio
 async def test_system_prompt_used_in_chat_completion() -> None:
-    """C-1: SYSTEM_PROMPT must be the system message content, not the model name."""
-    from app.ai.prompts.system_prompt import SYSTEM_PROMPT
+    """C-1: LLM receives a system message with safety rules, not the raw model name."""
     from app.bot.handlers.chat import handle_message
 
     msg = _make_message("Расскажи мне об упражнениях")
@@ -88,8 +87,10 @@ async def test_system_prompt_used_in_chat_completion() -> None:
     messages = call_args.kwargs.get("messages") or call_args.args[0]
     system_msg = messages[0]
     assert system_msg["role"] == "system"
-    assert system_msg["content"] == SYSTEM_PROMPT
+    # Pipeline builds a dynamic prompt — verify it contains core safety content
+    assert "не врач" in system_msg["content"] or "самопомощи" in system_msg["content"]
     assert system_msg["content"] != "openrouter/free"
+    assert len(system_msg["content"]) > 100
 
 
 @pytest.mark.asyncio
@@ -259,12 +260,13 @@ async def test_safe_response_content_forwarded_to_user() -> None:
     ):
         await handle_message(msg)
 
-    msg.answer.assert_called_once_with(fake_response.content)
+    msg.answer.assert_called_once()
+    assert msg.answer.call_args.args[0] == fake_response.content
 
 
 @pytest.mark.asyncio
 async def test_output_validator_not_called_without_consent() -> None:
-    """C-11: validate_support_response is never called when the user has no consent."""
+    """C-11: output validation is never reached when the user has no consent."""
     from app.bot.handlers.chat import handle_message
 
     msg = _make_message("Привет", user_id=88002)
@@ -272,7 +274,8 @@ async def test_output_validator_not_called_without_consent() -> None:
     with (
         patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=False),
         patch("app.bot.handlers.chat.OpenRouterClient"),
-        patch("app.bot.handlers.chat.validate_support_response") as mock_validator,
+        # validate_support_response now lives inside the pipeline; patch it there
+        patch("app.ai.orchestration.pipeline.validate_support_response") as mock_validator,
     ):
         await handle_message(msg)
 

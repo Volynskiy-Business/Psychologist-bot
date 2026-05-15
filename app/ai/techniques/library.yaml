@@ -1,0 +1,434 @@
+version: "1.0"
+techniques:
+  - id: labeling_dbt
+    title: "Называние чувств (DBT)"
+    evidence_base: "DBT"
+    risk_ceiling: 2
+    emotion_states:
+      - sadness
+      - anxiety
+      - anger
+      - shame
+      - grief
+    instructions: >-
+      Предложи пользователю назвать своё чувство одним словом: «Я сейчас чувствую...».
+      Объясни: называние снижает интенсивность аффекта — нейронаука показывает снижение активности миндалины при вербализации.
+      Пример: «Попробуй сказать себе прямо сейчас: "Я сейчас чувствую..." — и назвать это одним словом».
+      Не торопи и не интерпретируй выбранное слово.
+    contraindications:
+      - "Not effective during acute crisis (Tier 3+)"
+      - "Not recommended when user is cognitively overwhelmed — body technique first"
+    bot_usage_boundary: "Suggest naming a feeling with one word; user decides; bot does not interpret or label on their behalf"
+
+  - id: self_compassion_neff
+    title: "Самосострадание (Kristin Neff)"
+    evidence_base: "Self-Compassion (Neff)"
+    risk_ceiling: 2
+    emotion_states:
+      - sadness
+      - grief
+      - guilt
+      - shame
+      - exhaustion
+    instructions: >-
+      Предложи три фразы самосострадания, произносить медленно с паузой после каждой.
+      1. «Это больно» — признать боль без преувеличения.
+      2. «Я не один(а) в этом» — общая человечность.
+      3. «Пусть я буду добр(а) к себе» — намерение.
+      Попроси пользователя произнести их про себя или вслух, медленно.
+    contraindications:
+      - "Some users resist self-compassion due to deep shame — offer gently, never push"
+    bot_usage_boundary: "Offer three phrases; user chooses whether to try; not a therapeutic exercise — just an invitation"
+
+  - id: behavioral_activation
+    title: "Поведенческая активация (КПТ)"
+    evidence_base: "CBT"
+    risk_ceiling: 1
+    emotion_states:
+      - sadness
+      - loss_of_meaning
+      - exhaustion
+    instructions: >-
+      Предложи одно маленькое приятное действие прямо сейчас — не ожидая мотивации.
+      Акцент: «не когда захочется, а прямо сейчас».
+      Вопрос: «Что одно маленькое дело могло бы доставить хоть немного удовольствия прямо сейчас?»
+      Мотивация приходит ПОСЛЕ действия, не до — объясни это.
+    contraindications:
+      - "Not suitable for severe hopelessness (Tier 2+) — normalize first"
+      - "Not suitable for exhaustion without rest or basics addressed first"
+    bot_usage_boundary: "Suggest one small action; bot does not prescribe; user defines and decides the action"
+
+  - id: permission_to_grieve
+    title: "Разрешение горевать"
+    evidence_base: "Grief Work"
+    risk_ceiling: 2
+    emotion_states:
+      - sadness
+      - grief
+      - loss
+    instructions: >-
+      Предложи «разрешить себе» 10–15 минут — просто побыть с болью, не пытаясь её исправить.
+      Не анализировать, не бороться, не заглушать.
+      Пример: «Что если прямо сейчас — 10 минут — просто позволить этой боли быть, не пытаясь её исправить?»
+      После этого можно вернуться к чему-то другому.
+    contraindications:
+      - "Not suitable during acute crisis or if user needs grounding first"
+    bot_usage_boundary: "Invite user to allow the pain to exist for a short time; bot does not guide a therapy session"
+
+  - id: physiological_sigh
+    title: "Физиологический вздох"
+    evidence_base: "Neuroscience (Huberman Lab / Stanford)"
+    risk_ceiling: 2
+    emotion_states:
+      - anxiety
+      - panic
+      - stress
+    instructions: >-
+      Двойной вдох через нос (два коротких вдоха подряд) + долгий медленный выдох через рот.
+      1–2 цикла сбрасывают симпатическую активацию — открываются альвеолы, CO2 выводится.
+      Пример: «Попробуй прямо сейчас: два коротких вдоха носом — затем один долгий выдох ртом. Ещё раз».
+    contraindications:
+      - "Avoid if user has respiratory conditions"
+    bot_usage_boundary: "Describe the breathing technique; user chooses to try; not medical advice"
+
+  - id: grounding_54321
+    title: "Граундинг 5-4-3-2-1"
+    evidence_base: "Sensory Grounding"
+    risk_ceiling: 3
+    emotion_states:
+      - anxiety
+      - panic
+      - dissociation
+      - overwhelm
+    instructions: >-
+      5 видимых предметов → 4 звука → 3 телесных ощущения → 2 запаха → 1 вкус.
+      Возвращает в «здесь и сейчас» через сенсорные каналы.
+      Пример: «Попробуй прямо сейчас: назови про себя 5 вещей, которые видишь вокруг».
+      Можно остановиться после первого шага — даже он помогает.
+    contraindications:
+      - "May need adaptation if user has sensory processing differences"
+    bot_usage_boundary: "Describe the 5-4-3-2-1 steps; user does it independently; one step at a time is enough"
+
+  - id: worry_scheduling
+    title: "Запланированное беспокойство (КПТ)"
+    evidence_base: "CBT"
+    risk_ceiling: 1
+    emotion_states:
+      - anxiety
+      - rumination
+    instructions: >-
+      Предложи перенести тревожные мысли на конкретные 15–20 минут позже.
+      Записать или отметить: «Буду беспокоиться об этом в [конкретное время]».
+      Когда мысль возвращается раньше — напомнить себе: «Это уже расписано».
+    contraindications:
+      - "Not suitable for acute anxiety or panic — body technique first"
+      - "Not suitable if the concern requires immediate action"
+    bot_usage_boundary: "Suggest postponing worry to a scheduled window; user decides the time; bot does not monitor or follow up"
+
+  - id: accepting_uncertainty_act
+    title: "Принятие неопределённости (ACT)"
+    evidence_base: "ACT"
+    risk_ceiling: 1
+    emotion_states:
+      - anxiety
+      - uncertainty
+    instructions: >-
+      Предложи фразу-якорь для медленного повторения:
+      «Я не знаю, что будет. Это нормально — не знать. Неопределённость — часть жизни».
+      Не пытаться убедить или доказать — просто произнести и заметить, что происходит.
+    contraindications:
+      - "Not suitable for users in active crisis or acute danger"
+    bot_usage_boundary: "Offer one anchor phrase; user decides whether to use it; not a persuasion attempt"
+
+  - id: physical_discharge
+    title: "Физический сброс напряжения"
+    evidence_base: "Somatic"
+    risk_ceiling: 1
+    emotion_states:
+      - anger
+      - frustration
+      - stress
+    instructions: >-
+      Физическое действие снижает физиологическое возбуждение до когнитивной работы.
+      Варианты: встряхнуть кисти рук, пройтись быстрым шагом, холодная вода на запястья.
+      Пример: «Прямо сейчас — попробуй встряхнуть руки 10 секунд, как будто стряхиваешь воду».
+    contraindications:
+      - "Ensure physical discharge is safe for the user's physical condition"
+    bot_usage_boundary: "Suggest simple physical options; user chooses what is safe and appropriate for them"
+
+  - id: stop_pause
+    title: "СТОП-пауза"
+    evidence_base: "DBT / Mindfulness"
+    risk_ceiling: 1
+    emotion_states:
+      - anger
+      - impulsivity
+      - frustration
+    instructions: >-
+      СТОП: Остановись → Вдохни (один медленный вдох) → Осмотрись (что происходит внутри?) → Действуй осознанно.
+      Пример: «Прямо сейчас: стоп. Один медленный вдох. Что ты чувствуешь в теле прямо сейчас?»
+    contraindications:
+      - "Not effective during active verbal conflict — move to physical discharge first"
+    bot_usage_boundary: "Describe the STOP steps; user applies them on their own; not a directive"
+
+  - id: validate_need
+    title: "Валидация потребности за злостью"
+    evidence_base: "Emotion-Focused Therapy"
+    risk_ceiling: 1
+    emotion_states:
+      - anger
+      - frustration
+    instructions: >-
+      Злость сигнализирует о нарушенной границе или неудовлетворённой потребности.
+      Вопрос для пользователя: «Что за этой злостью — какая потребность не была услышана или нарушена?»
+      Помоги назвать потребность, не оценивать её.
+    contraindications:
+      - "Not suitable in acute rage state — discharge tension first"
+    bot_usage_boundary: "Ask one reflective question; bot does not interpret or analyze the answer"
+
+  - id: i_statement_nvc
+    title: "Я-высказывание (ненасильственное общение)"
+    evidence_base: "NVC (Rosenberg)"
+    risk_ceiling: 1
+    emotion_states:
+      - anger
+      - conflict
+      - frustration
+    instructions: >-
+      Формула: «Я чувствую X, когда Y, потому что Z».
+      X — чувство (не оценка другого), Y — конкретное событие, Z — потребность.
+      Пример: «Попробуй сформулировать одно предложение по этой схеме про свою ситуацию».
+    contraindications:
+      - "Not suitable when user needs physical discharge first"
+      - "Not for active conflict — prepare in a calm moment"
+    bot_usage_boundary: "Explain the formula and invite user to try; bot does not coach real-time communication"
+
+  - id: micro_contact
+    title: "Микроконтакт"
+    evidence_base: "Social Psychology"
+    risk_ceiling: 2
+    emotion_states:
+      - loneliness
+      - isolation
+    instructions: >-
+      Написать одному человеку одно короткое сообщение — не объяснять всё, просто выйти на связь.
+      Барьер должен быть минимальным: «Привет, думал(а) о тебе» или просто мем или голосовое.
+      Пример: «Есть один человек, которому ты мог(ла) бы написать прямо сейчас? Одно сообщение».
+    contraindications:
+      - "Not suitable if user has severe social anxiety or conflict with all close contacts"
+    bot_usage_boundary: "Suggest reaching out to one person; user decides to whom, what to say, and whether to do it"
+
+  - id: common_humanity_act
+    title: "Общая человечность (ACT / самосострадание)"
+    evidence_base: "ACT / Self-Compassion"
+    risk_ceiling: 2
+    emotion_states:
+      - loneliness
+      - shame
+      - isolation
+    instructions: >-
+      Напомни: прямо сейчас миллионы людей чувствуют похожее.
+      Одиночество или стыд — не уникальный дефект, а общечеловеческий опыт.
+      Пример: «Прямо в эту минуту миллионы людей в мире чувствуют нечто похожее на то, что чувствуешь ты».
+    contraindications:
+      - "Personalize carefully — avoid sounding dismissive"
+    bot_usage_boundary: "Offer a normalizing thought; not reassurance or minimization of the individual experience"
+
+  - id: mindful_self_presence
+    title: "Осознанное присутствие с собой"
+    evidence_base: "Mindfulness"
+    risk_ceiling: 2
+    emotion_states:
+      - loneliness
+      - exhaustion
+      - anxiety
+    instructions: >-
+      5 минут с тёплым напитком без телефона — быть с собой как с хорошим другом.
+      Пример: «Сделай себе чай или кофе. Сядь. 5 минут без телефона — просто будь рядом с собой».
+    contraindications:
+      - "Not suitable during acute crisis"
+    bot_usage_boundary: "Suggest 5 minutes alone with a warm drink; user decides; not a mindfulness assignment"
+
+  - id: minimum_dose
+    title: "Минимальная доза (одно действие)"
+    evidence_base: "CBT / Behavioral"
+    risk_ceiling: 2
+    emotion_states:
+      - exhaustion
+      - burnout
+      - loss_of_meaning
+    instructions: >-
+      Вопрос: «Что одно самое маленькое действие возможно прямо сейчас?»
+      Не «исправить всё», не «встать и сделать» — одно крошечное конкретное действие.
+      Пример: «Не что делать со всей ситуацией — а что одно, самое маленькое, возможно прямо сейчас?»
+    contraindications:
+      - "If user needs rest — permission to do nothing is also valid"
+    bot_usage_boundary: "Ask what the smallest possible step is; user defines it; permission to do nothing is equally valid"
+
+  - id: check_basic_needs
+    title: "Проверка базовых потребностей"
+    evidence_base: "Behavioral Health"
+    risk_ceiling: 2
+    emotion_states:
+      - exhaustion
+      - anxiety
+      - stress
+    instructions: >-
+      При перегрузке базовые потребности часто игнорируются.
+      Вопросы: «Когда последний раз пил(а) воду? Ел(а)? Был(а) на свежем воздухе? Спал(а)?»
+      Выбери один вопрос, наиболее подходящий к контексту.
+    contraindications: []
+    bot_usage_boundary: "Ask one basic needs question; not a clinical assessment; user responds freely"
+
+  - id: resource_inventory
+    title: "Инвентаризация ресурсов"
+    evidence_base: "Positive Psychology"
+    risk_ceiling: 1
+    emotion_states:
+      - exhaustion
+      - burnout
+    instructions: >-
+      Вопросы: «Что даёт хоть немного сил?» «Как добавить больше этого в ближайшие сутки?»
+      Не «что поможет выйти из выгорания», а «что даёт хоть немного энергии прямо сейчас».
+    contraindications:
+      - "Not suitable for acutely depleted users — check basics first"
+    bot_usage_boundary: "Ask what gives energy; user identifies their own resources; bot does not prescribe activities"
+
+  - id: letter_to_friend_cbt
+    title: "Письмо другу (КПТ)"
+    evidence_base: "CBT"
+    risk_ceiling: 2
+    emotion_states:
+      - guilt
+      - shame
+      - self_criticism
+    instructions: >-
+      Вопрос: «Что бы ты сказал(а) близкому другу в точно такой же ситуации?»
+      Попроси написать это другу — или просто проговорить вслух.
+      Затем: перечитать или услышать это как послание себе.
+    contraindications:
+      - "Move gently — some users struggle with self-compassion"
+    bot_usage_boundary: "Ask what user would say to a friend; user generates the response themselves; bot does not provide the letter"
+
+  - id: guilt_vs_shame
+    title: "Различение вины и стыда"
+    evidence_base: "Clinical Psychology (Brené Brown)"
+    risk_ceiling: 2
+    emotion_states:
+      - guilt
+      - shame
+    instructions: >-
+      Вина: «я сделал(а) что-то против своих ценностей» — действие, поправимо.
+      Стыд: «я плохой(ая)» — идентичность, и это не правда.
+      Вопрос: «Это про то, что ты сделал(а) — или про то, кем ты считаешь себя?»
+    contraindications:
+      - "Move carefully if shame is deep — don't rush to the distinction"
+    bot_usage_boundary: "Offer one distinguishing question; user reflects on their own; bot does not provide analysis"
+
+  - id: reparative_action
+    title: "Репаративное действие"
+    evidence_base: "CBT / Ethics"
+    risk_ceiling: 1
+    emotion_states:
+      - guilt
+      - shame
+    instructions: >-
+      Одно небольшое конкретное действие, которое что-то исправляет или выражает сожаление.
+      Вопрос: «Что одно маленькое действие могло бы что-то исправить или выразить сожаление?»
+      Акцент на малости и конкретности — не «исправить всё».
+    contraindications:
+      - "Not suitable when reparative action involves interpersonal harm or safety risk"
+    bot_usage_boundary: "Ask about one small repair; user decides what is possible; bot does not evaluate the action"
+
+  - id: normalize_apathy
+    title: "Нормализация апатии"
+    evidence_base: "Clinical Psychology"
+    risk_ceiling: 2
+    emotion_states:
+      - loss_of_meaning
+      - apathy
+      - exhaustion
+    instructions: >-
+      Апатия — защитная реакция психики, часто после перегрузки или потери. Это временное состояние.
+      Предложи: не бороться с апатией, а просто побыть рядом с ней — без попыток исправить.
+      Пример: «Апатия часто возникает, когда психика перегружена. Это не навсегда и не дефект».
+    contraindications:
+      - "If apathy is persistent for weeks — recommend professional consultation"
+    bot_usage_boundary: "Offer normalizing framing; not a diagnosis; bot cannot assess whether apathy is clinical"
+
+  - id: values_compass_act
+    title: "Ценностный компас (ACT)"
+    evidence_base: "ACT"
+    risk_ceiling: 2
+    emotion_states:
+      - loss_of_meaning
+      - apathy
+      - uncertainty
+    instructions: >-
+      Вопросы: «Что было важно тебе год назад? Что ты хотел(а) бы, чтобы о тебе помнили? Одно слово».
+      Не цели — а ценности. Ценности не достигаются, а проявляются в действии прямо сейчас.
+    contraindications:
+      - "Not suitable in acute crisis — grounding first"
+    bot_usage_boundary: "Ask values-oriented questions; user identifies their own values; bot does not prescribe meaning"
+
+  - id: action_without_motivation
+    title: "Действие без мотивации (КПТ)"
+    evidence_base: "CBT / Behavioral Activation"
+    risk_ceiling: 1
+    emotion_states:
+      - loss_of_meaning
+      - apathy
+    instructions: >-
+      Мотивация часто приходит ПОСЛЕ действия, не до.
+      Предложи одно крошечное действие — посмотреть, что появится после.
+      Пример: «Что если сделать одно совсем маленькое действие — не потому что хочется, а просто посмотреть, что будет?»
+    contraindications:
+      - "Not suitable for severe exhaustion without basic needs addressed first"
+    bot_usage_boundary: "Suggest one tiny action as an experiment; user decides; not a prescription for motivation"
+
+  - id: circles_of_influence
+    title: "Круги влияния (Covey)"
+    evidence_base: "Covey / CBT"
+    risk_ceiling: 1
+    emotion_states:
+      - uncertainty
+      - control
+      - anxiety
+    instructions: >-
+      Разделить ситуацию на «в моих руках» и «вне моего контроля».
+      Фокус только на первое: что прямо сейчас зависит от тебя?
+      Пример: «Давай разберём: что из этого в твоих руках? А что — нет? Начнём с того, что в твоих руках».
+    contraindications: []
+    bot_usage_boundary: "Help organize what is in and out of control; user does the reflection; bot does not solve the situation"
+
+  - id: next_small_step
+    title: "Следующий маленький шаг"
+    evidence_base: "Solution-Focused / CBT"
+    risk_ceiling: 2
+    emotion_states:
+      - uncertainty
+      - overwhelm
+      - loss_of_meaning
+      - exhaustion
+    instructions: >-
+      Не «что делать со всем этим», а «что одно возможно в ближайший час».
+      Пример: «Если не думать обо всём сразу — что одно возможно прямо сейчас, в ближайший час?»
+    contraindications: []
+    bot_usage_boundary: "Ask about one next step in the near term; user defines it; bot does not plan on their behalf"
+
+  - id: body_grounding
+    title: "Заземление в теле"
+    evidence_base: "Somatic / Mindfulness"
+    risk_ceiling: 3
+    emotion_states:
+      - uncertainty
+      - panic
+      - dissociation
+      - anxiety
+    instructions: >-
+      Тело здесь, тело в безопасности прямо сейчас.
+      Вернуться к телесным ощущениям: почувствовать ноги на полу, спину на стуле, руки.
+      Пример: «Почувствуй прямо сейчас: ноги на полу — есть ли это ощущение? Твёрдость под ногами».
+    contraindications:
+      - "Avoid if user is in physical danger"
+    bot_usage_boundary: "Suggest noticing body sensations; user does this independently; not a somatic therapy session"

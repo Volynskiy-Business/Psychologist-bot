@@ -1,5 +1,6 @@
 """Main chat handler with safety checks."""
 
+import asyncio
 import logging
 
 import httpx
@@ -7,8 +8,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 
 from app.ai.openrouter_client import OpenRouterClient
-from app.ai.output_validation import validate_support_response
-from app.ai.prompts.system_prompt import SYSTEM_PROMPT
+from app.ai.orchestration.pipeline import SupportPipeline
 from app.bot.handlers.i18n import get_text, get_user_language
 from app.bot.handlers.mood import consume_note_waiter, is_awaiting_note
 from app.config import settings
@@ -20,6 +20,53 @@ from app.safety.safety_protocols import get_crisis_response
 
 logger = logging.getLogger(__name__)
 router = Router()
+
+# In-memory conversation history keyed by telegram user_id.
+# Stores alternating user/assistant dicts; capped at _MAX_HISTORY messages total.
+_history: dict[int, list[dict[str, str]]] = {}
+_MAX_HISTORY = 20  # 10 exchanges
+
+
+def _get_history(user_id: int) -> list[dict[str, str]]:
+    return _history.get(user_id, [])
+
+
+def _record_exchange(user_id: int, user_text: str, bot_reply: str) -> None:
+    h = _history.setdefault(user_id, [])
+    h.append({"role": "user", "content": user_text})
+    h.append({"role": "assistant", "content": bot_reply})
+    if len(h) > _MAX_HISTORY:
+        _history[user_id] = h[-_MAX_HISTORY:]
+
+
+def _build_context_str(user_id: int) -> str:
+    """Return recent conversation as a plain string for the classifier's context field."""
+    recent = _get_history(user_id)[-4:]  # last 2 exchanges
+    if not recent:
+        return ""
+    parts = []
+    for msg in recent:
+        prefix = "Пользователь" if msg["role"] == "user" else "Бот"
+        parts.append(f"{prefix}: {msg['content'][:200]}")
+    return "\n".join(parts)
+
+
+def _back_to_menu_kb(lang: str) -> types.InlineKeyboardMarkup:
+    return types.InlineKeyboardMarkup(
+        inline_keyboard=[[
+            types.InlineKeyboardButton(
+                text=get_text("menu.back_to_menu", lang),
+                callback_data="back_to_menu",
+            )
+        ]]
+    )
+
+
+async def _keep_typing(message: types.Message) -> None:
+    """Send typing action every 4 s so the indicator stays alive during slow LLM calls."""
+    while True:
+        await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
+        await asyncio.sleep(4)
 
 
 @router.message(Command("chat"))
@@ -89,8 +136,9 @@ async def handle_message(message: types.Message) -> None:
     classifier_model = settings.classifier_model or None
     classifier = SafetyClassifier(client, model=classifier_model)
 
+    context_str = _build_context_str(message.from_user.id)
     try:
-        classification = await classifier.classify(user_text)
+        classification = await classifier.classify(user_text, context=context_str)
         if classification.risk_level >= RiskLevel.POSSIBLE_CRISIS:
             await message.answer(get_crisis_response(classification.risk_level, lang))
             await client.close()
@@ -100,34 +148,29 @@ async def handle_message(message: types.Message) -> None:
             logger.warning("stage=classifier status=429 rate_limited; failing closed")
         else:
             logger.exception("stage=classifier status=%d failing closed", exc.response.status_code)
-        await message.answer(get_text("chat.classifier_unavailable", lang))
+        await message.answer(get_text("chat.classifier_unavailable", lang), reply_markup=_back_to_menu_kb(lang))
         await client.close()
         return
     except Exception:
         logger.exception("stage=classifier exception; failing closed")
-        await message.answer(get_text("chat.classifier_unavailable", lang))
+        await message.answer(get_text("chat.classifier_unavailable", lang), reply_markup=_back_to_menu_kb(lang))
         await client.close()
         return
 
-    # Step 3: Normal support flow
-    await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
-
+    # Step 3: Multi-agent support pipeline — keeps typing indicator alive throughout
+    history = _get_history(message.from_user.id)
+    pipeline = SupportPipeline(client, model=settings.default_model or None)
+    typing_task = asyncio.create_task(_keep_typing(message))
     try:
-        response = await client.chat_completion(
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_text},
-            ],
-            temperature=0.4,
-            max_tokens=700,
-        )
-        is_safe, block_reason = validate_support_response(response.content)
-        if not is_safe:
-            logger.warning("stage=output_validation blocked reason=%s", block_reason)
-            await message.answer(get_text("chat.output_blocked", lang))
+        result = await pipeline.run(user_text, lang, history)
+        if not result.is_safe:
+            logger.warning("stage=output_validation blocked reason=%s", result.block_reason)
+            await message.answer(get_text("chat.output_blocked", lang), reply_markup=_back_to_menu_kb(lang))
         else:
-            await message.answer(response.content)
+            _record_exchange(message.from_user.id, user_text, result.content)
+            await message.answer(result.content, reply_markup=_back_to_menu_kb(lang))
     except Exception:
-        await message.answer(get_text("chat.error", lang))
+        await message.answer(get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang))
     finally:
+        typing_task.cancel()
         await client.close()

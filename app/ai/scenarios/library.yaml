@@ -1,0 +1,773 @@
+version: "1.0"
+scenarios:
+  - id: sadness_grief
+    title: "Грусть / Тоска / Утрата"
+    emotion_signals:
+      - грустно
+      - грусть
+      - тоска
+      - тоскую
+      - горе
+      - горюю
+      - утрата
+      - потеря
+      - плачу
+      - расставание
+      - развод
+      - умер
+      - умерла
+      - скучаю
+      - пусто
+      - sad
+      - sadness
+      - grief
+      - loss
+      - heartbreak
+      - mourning
+      - miss
+      - broke up
+      - divorce
+    risk_signals:
+      - невыносимо
+      - больше не могу
+      - нет смысла жить
+      - устал жить
+      - устала жить
+    risk_ceiling: 2
+    recommended_techniques:
+      - labeling_dbt
+      - self_compassion_neff
+      - behavioral_activation
+      - permission_to_grieve
+    response_shape: "hear → normalize → one_tool → invite_continue"
+    do_rules:
+      - "Acknowledge the pain before offering anything"
+      - "Normalize the emotion — this is a human response, not a flaw"
+      - "Offer one small, concrete, immediately actionable tool"
+      - "End with a gentle open invitation, not a direct closed question"
+    dont_rules:
+      - "Don't minimize the pain or compare it to others"
+      - "Don't rush to solutions or positivity"
+      - "Don't say 'everything will be okay' or 'time heals all wounds'"
+      - "Don't promise recovery or specific outcomes"
+    contraindications:
+      - "Avoid behavioral_activation if user signals severe hopelessness (Tier 2)"
+    escalation_rules:
+      - "If user mentions inability to continue living → escalate to Tier 3"
+
+  - id: anxiety
+    title: "Тревога / Беспокойство / Панические реакции"
+    emotion_signals:
+      - тревога
+      - тревожно
+      - тревожусь
+      - беспокойство
+      - беспокоюсь
+      - страх
+      - боюсь
+      - паника
+      - паникую
+      - нервничаю
+      - волнуюсь
+      - переживаю
+      - переживания
+      - стресс
+      - anxiety
+      - anxious
+      - worried
+      - worry
+      - fear
+      - scared
+      - panic
+      - nervous
+      - stressed
+      - dread
+    risk_signals:
+      - не могу дышать
+      - умираю от страха
+      - невозможно остановить
+    risk_ceiling: 2
+    recommended_techniques:
+      - physiological_sigh
+      - grounding_54321
+      - worry_scheduling
+      - accepting_uncertainty_act
+    response_shape: "hear → validate → physical_anchor → invite_continue"
+    do_rules:
+      - "Validate the physical reality of anxiety — it is real, not imagined"
+      - "Offer a body-based technique before cognitive ones"
+      - "Keep instructions short and immediately actionable"
+      - "Normalize uncertainty as part of life"
+    dont_rules:
+      - "Don't say 'just don't worry' or 'there is nothing to be afraid of'"
+      - "Don't give multiple techniques at once"
+      - "Don't amplify or dramatize the anxiety"
+    contraindications:
+      - "Avoid worry_scheduling during acute panic — body first"
+    escalation_rules:
+      - "If user mentions inability to stay safe → escalate to Tier 3"
+
+  - id: anger
+    title: "Злость / Раздражение / Фрустрация"
+    emotion_signals:
+      - злость
+      - злюсь
+      - злой
+      - злая
+      - раздражение
+      - раздражает
+      - бесит
+      - бешусь
+      - ненависть
+      - ярость
+      - агрессия
+      - конфликт
+      - ссора
+      - angry
+      - anger
+      - furious
+      - rage
+      - irritated
+      - frustrated
+      - frustration
+      - mad
+      - annoyed
+    risk_signals:
+      - хочу причинить
+      - хочу ударить
+      - want to hurt
+    risk_ceiling: 1
+    recommended_techniques:
+      - physical_discharge
+      - stop_pause
+      - validate_need
+      - i_statement_nvc
+    response_shape: "hear → validate_emotion → body_first → cognitive_bridge"
+    do_rules:
+      - "Validate the anger without amplifying it"
+      - "Start with the body — discharge tension before cognitive work"
+      - "Move to the need behind the anger"
+    dont_rules:
+      - "Don't tell user they shouldn't feel angry"
+      - "Don't immediately jump to communication techniques"
+      - "Don't moralize or lecture"
+    contraindications:
+      - "Skip i_statement_nvc if user is in acute rage — body techniques first"
+    escalation_rules:
+      - "If user mentions harming others → escalate to Tier 3"
+
+  - id: loneliness
+    title: "Одиночество / Изоляция / Отчуждение"
+    emotion_signals:
+      - одиночество
+      - одинок
+      - одна
+      - один
+      - изоляция
+      - изолирован
+      - никого нет
+      - никто не понимает
+      - оторван
+      - отчуждение
+      - lonely
+      - loneliness
+      - alone
+      - isolated
+      - isolation
+      - no one
+      - disconnected
+      - alienated
+      - misunderstood
+    risk_signals:
+      - никому не нужен
+      - никому не нужна
+      - зачем жить
+    risk_ceiling: 2
+    recommended_techniques:
+      - micro_contact
+      - common_humanity_act
+      - mindful_self_presence
+    response_shape: "hear → validate → micro_action → normalize"
+    do_rules:
+      - "Acknowledge the pain of disconnection directly"
+      - "Offer the smallest possible social action"
+      - "Normalize with common humanity — not as dismissal, but as connection"
+    dont_rules:
+      - "Don't say 'just go out and meet people'"
+      - "Don't minimize the isolation"
+      - "Don't push for large social commitments"
+    contraindications:
+      - "Avoid micro_contact if user signals severe social anxiety or conflict with all close contacts"
+    escalation_rules:
+      - "If user expresses hopelessness about ever connecting → escalate to Tier 2"
+
+  - id: exhaustion
+    title: "Усталость / Истощение / Выгорание"
+    emotion_signals:
+      - усталость
+      - устал
+      - устала
+      - истощение
+      - выгорание
+      - нет сил
+      - нет энергии
+      - перегрузка
+      - вымотан
+      - вымотана
+      - больше не могу
+      - сил нет
+      - tired
+      - exhausted
+      - burnout
+      - drained
+      - depleted
+      - no energy
+      - worn out
+    risk_signals:
+      - больше не могу жить
+      - устал жить
+      - устала жить
+    risk_ceiling: 2
+    recommended_techniques:
+      - minimum_dose
+      - check_basic_needs
+      - resource_inventory
+    response_shape: "hear → normalize → micro_action → permission_to_rest"
+    do_rules:
+      - "Validate the exhaustion without pushing toward productivity"
+      - "Focus on the smallest possible single step or nothing at all"
+      - "Check basics — water, food, air, rest"
+    dont_rules:
+      - "Don't say 'you just need rest' without acknowledging the depth of exhaustion"
+      - "Don't push for reflection or planning when user is depleted"
+      - "Don't give a list of self-care actions"
+    contraindications:
+      - "Avoid resource_inventory if user is in acute depletion — basics first"
+    escalation_rules:
+      - "If user mentions inability to continue living → escalate to Tier 3"
+
+  - id: guilt_shame
+    title: "Вина / Стыд / Самокритика"
+    emotion_signals:
+      - вина
+      - виноват
+      - виновата
+      - стыд
+      - стыдно
+      - самокритика
+      - плохой
+      - плохая
+      - ужасный
+      - ужасная
+      - провал
+      - неудача
+      - облажался
+      - облажалась
+      - guilt
+      - guilty
+      - shame
+      - ashamed
+      - failure
+      - worthless
+      - terrible
+      - let down
+    risk_signals:
+      - не заслуживаю
+      - лучше бы меня не было
+    risk_ceiling: 2
+    recommended_techniques:
+      - letter_to_friend_cbt
+      - guilt_vs_shame
+      - reparative_action
+    response_shape: "hear → normalize → distinction → micro_repair"
+    do_rules:
+      - "Distinguish guilt (action-based) from shame (identity-based)"
+      - "Validate the pain without validating the self-attack"
+      - "Offer one small reparative or self-compassion step"
+    dont_rules:
+      - "Don't rush to reassure ('you are not bad')"
+      - "Don't moralize about the original action"
+      - "Don't skip the guilt–shame distinction"
+    contraindications:
+      - "Avoid reparative_action if situation involves harm needing professional support"
+    escalation_rules:
+      - "If shame escalates to identity collapse with hopelessness → escalate to Tier 2"
+
+  - id: loss_of_meaning
+    title: "Потеря смысла / Апатия / Экзистенциальный кризис"
+    emotion_signals:
+      - нет смысла
+      - апатия
+      - апатично
+      - зачем
+      - не хочется
+      - не интересно
+      - пустота
+      - ничего не радует
+      - безразличие
+      - meaningless
+      - no meaning
+      - apathy
+      - apathetic
+      - pointless
+      - why bother
+      - nothing matters
+      - indifferent
+      - no joy
+    risk_signals:
+      - нет смысла жить
+      - зачем жить
+      - зачем мне жить
+    risk_ceiling: 2
+    recommended_techniques:
+      - normalize_apathy
+      - values_compass_act
+      - action_without_motivation
+    response_shape: "hear → normalize → values_anchor → micro_action"
+    do_rules:
+      - "Normalize apathy as a protective response, not a flaw"
+      - "Anchor to values rather than goals or productivity"
+      - "Offer the smallest possible action"
+    dont_rules:
+      - "Don't push for big motivational thinking"
+      - "Don't say 'you have so much to live for'"
+      - "Don't lecture on meaning-making"
+    contraindications:
+      - "If apathy is persistent weeks or months — recommend professional consultation"
+    escalation_rules:
+      - "If meaning crisis includes active suicidal ideation → escalate to Tier 3"
+
+  - id: uncertainty
+    title: "Неопределённость / Потеря контроля"
+    emotion_signals:
+      - неопределённость
+      - не знаю что делать
+      - непонятно
+      - потерялся
+      - потерялась
+      - хаос
+      - неизвестность
+      - нет контроля
+      - всё рушится
+      - uncertain
+      - uncertainty
+      - confused
+      - chaos
+      - no control
+      - everything falling apart
+      - unpredictable
+      - lost
+    risk_signals:
+      - всё рушится и нет смысла
+    risk_ceiling: 1
+    recommended_techniques:
+      - circles_of_influence
+      - next_small_step
+      - body_grounding
+    response_shape: "hear → normalize → control_distinction → next_step"
+    do_rules:
+      - "Distinguish what is in the user's control from what is not"
+      - "Focus on the single next actionable step — not the whole situation"
+      - "Ground in the body: it is safe right now"
+    dont_rules:
+      - "Don't try to resolve the uncertainty"
+      - "Don't offer false reassurance that things will work out"
+      - "Don't overwhelm with planning frameworks"
+    contraindications: []
+    escalation_rules:
+      - "If loss of control includes safety risk → escalate to Tier 2"
+
+  - id: diagnosis_request
+    title: "Запрос диагноза или самодиагностики"
+    emotion_signals:
+      - диагноз
+      - поставьте диагноз
+      - у меня депрессия
+      - у меня тревожное расстройство
+      - у меня птср
+      - у меня биполярное
+      - тест на депрессию
+      - diagnose me
+      - do i have depression
+      - am i depressed
+      - do i have anxiety disorder
+      - ptsd test
+      - bipolar
+    risk_signals: []
+    risk_ceiling: 1
+    recommended_techniques: []
+    response_shape: "decline_diagnosis → explain_why → offer_symptom_list → referral"
+    do_rules:
+      - "Clearly decline to diagnose"
+      - "Explain that diagnosis requires a qualified in-person specialist"
+      - "Offer to help prepare a symptom description for a doctor visit"
+    dont_rules:
+      - "Don't hint at any specific diagnosis"
+      - "Don't say 'it sounds like you might have...'"
+      - "Don't suggest self-diagnosis tools or tests"
+    contraindications: []
+    escalation_rules: []
+
+  - id: medication_question
+    title: "Вопрос о лекарствах или психиатрической помощи"
+    emotion_signals:
+      - лекарства
+      - таблетки
+      - антидепрессанты
+      - дозировка
+      - назначение
+      - пью антидепрессанты
+      - побочные эффекты
+      - medication
+      - antidepressant
+      - dosage
+      - prescription
+      - side effects
+      - pills
+      - meds
+      - psychiatrist
+    risk_signals:
+      - передозировка
+      - overdose
+    risk_ceiling: 1
+    recommended_techniques: []
+    response_shape: "acknowledge → decline_medication_advice → safety_boundary → referral"
+    do_rules:
+      - "Acknowledge the question without judgment"
+      - "Decline to discuss dosages, adjustments, or interactions"
+      - "Refer to the prescribing doctor for all medication questions"
+      - "If side effects or overdose risk mentioned — recommend urgent medical contact"
+    dont_rules:
+      - "Don't comment on any specific medication by name"
+      - "Don't suggest changing or stopping medication"
+      - "Don't offer reassurance about side effects"
+    contraindications: []
+    escalation_rules:
+      - "If user mentions overdose risk → escalate to Tier 4"
+
+  - id: breakup_divorce
+    title: "Расставание / Развод / Разрыв отношений"
+    emotion_signals:
+      - расставание
+      - развод
+      - разрыв
+      - бросил
+      - бросила
+      - ушёл
+      - ушла
+      - расстались
+      - бывший
+      - бывшая
+      - broke up
+      - breakup
+      - divorce
+      - divorced
+      - separation
+      - left me
+    risk_signals:
+      - не могу без него
+      - не могу без неё
+      - не хочу жить без
+    risk_ceiling: 2
+    recommended_techniques:
+      - labeling_dbt
+      - self_compassion_neff
+      - permission_to_grieve
+    response_shape: "hear → validate_identity_loss → normalize → one_tool → invite_continue"
+    do_rules:
+      - "Acknowledge the pain of loss, not just the practical change"
+      - "Validate grief over the relationship and the future that was imagined"
+      - "Normalize identity disruption — it is normal to feel lost after a relationship ends"
+      - "Offer one self-compassion or emotion-labeling tool"
+    dont_rules:
+      - "Don't say 'you'll find someone better' or 'there are plenty of fish'"
+      - "Don't minimize the pain even if the relationship was difficult"
+      - "Don't analyze the relationship dynamics or assign blame"
+    contraindications:
+      - "Avoid behavioral activation in acute grief — normalize and hold first"
+    escalation_rules:
+      - "If user expresses hopelessness about ever connecting again → escalate to Tier 2"
+
+  - id: death_of_loved_one
+    title: "Потеря близкого человека / Горе утраты"
+    emotion_signals:
+      - умер
+      - умерла
+      - скончался
+      - скончалась
+      - похороны
+      - погиб
+      - погибла
+      - потеря близкого
+      - утрата близкого
+      - смерть близкого
+      - died
+      - passed away
+      - funeral
+      - bereavement
+      - lost someone
+    risk_signals:
+      - не могу жить без него
+      - не могу жить без неё
+      - хочу умереть вместе
+    risk_ceiling: 2
+    recommended_techniques:
+      - permission_to_grieve
+      - self_compassion_neff
+      - labeling_dbt
+    response_shape: "hear_with_silence → acknowledge_depth → no_rush → one_invitation"
+    do_rules:
+      - "Hold space without immediately offering tools — validate the enormity of the loss"
+      - "Do not rush to normalize or reframe — grief needs space"
+      - "Gently offer permission to grieve, not a task"
+    dont_rules:
+      - "Don't say 'they are in a better place' or 'everything happens for a reason'"
+      - "Don't rush to cognitive reframing"
+      - "Don't minimize the grief or give a list of grief stages"
+    contraindications:
+      - "Avoid behavioral techniques in acute bereavement — hold space first"
+    escalation_rules:
+      - "If user expresses inability to continue living → escalate to Tier 3"
+
+  - id: job_loss
+    title: "Потеря работы / Профессиональный кризис"
+    emotion_signals:
+      - потерял работу
+      - потеряла работу
+      - уволили
+      - уволен
+      - уволена
+      - сократили
+      - без работы
+      - ищу работу
+      - не могу найти работу
+      - job loss
+      - lost my job
+      - fired
+      - laid off
+      - unemployed
+    risk_signals:
+      - не вижу смысла
+      - всё бесполезно
+    risk_ceiling: 1
+    recommended_techniques:
+      - normalize_apathy
+      - next_small_step
+      - circles_of_influence
+    response_shape: "hear → validate_identity_loss → circles_of_influence → next_step"
+    do_rules:
+      - "Acknowledge job loss as both a practical and identity crisis"
+      - "Validate the grief around professional identity"
+      - "Separate what is in the user's control from what is not"
+      - "Focus on a single next step — not a full job search plan"
+    dont_rules:
+      - "Don't immediately suggest action steps or job search strategies"
+      - "Don't minimize by saying 'you'll find something'"
+      - "Don't push for positivity"
+    contraindications: []
+    escalation_rules:
+      - "If job loss triggers hopelessness about life → escalate to Tier 2"
+
+  - id: financial_loss
+    title: "Финансовые трудности / Потеря денег"
+    emotion_signals:
+      - долги
+      - долг
+      - банкрот
+      - банкротство
+      - без денег
+      - финансовые проблемы
+      - потерял деньги
+      - потеряла деньги
+      - не хватает денег
+      - debt
+      - bankrupt
+      - financial crisis
+      - no money
+      - broke
+    risk_signals:
+      - выхода нет
+      - нет выхода
+    risk_ceiling: 1
+    recommended_techniques:
+      - circles_of_influence
+      - next_small_step
+      - check_basic_needs
+    response_shape: "hear → validate_fear → circles_of_influence → one_step"
+    do_rules:
+      - "Acknowledge the reality of financial stress — it is concrete and serious"
+      - "Validate the fear and shame that often accompany financial difficulties"
+      - "Focus on what is within the user's control right now"
+    dont_rules:
+      - "Don't minimize financial stress or offer generic advice"
+      - "Don't provide specific financial recommendations"
+    contraindications: []
+    escalation_rules:
+      - "If financial crisis involves safety risk or suicidal ideation → escalate to Tier 3"
+
+  - id: serious_illness_or_disability
+    title: "Серьёзная болезнь / Инвалидность / Хроническая боль"
+    emotion_signals:
+      - серьёзно болен
+      - серьёзно больна
+      - хронически болен
+      - хронически больна
+      - хроническая боль
+      - инвалид
+      - инвалидность
+      - неизлечимо болен
+      - неизлечимо больна
+      - тяжёлая болезнь
+      - seriously ill
+      - chronic illness
+      - chronic pain
+      - disability
+      - terminal illness
+    risk_signals:
+      - лучше умереть чем болеть
+    risk_ceiling: 2
+    recommended_techniques:
+      - self_compassion_neff
+      - check_basic_needs
+      - mindful_self_presence
+    response_shape: "hear → validate_difficulty → normalize_adaptation → gentle_support"
+    do_rules:
+      - "Acknowledge both the physical and psychological burden of illness"
+      - "Validate the grief over what has been lost — function, certainty, identity"
+      - "Offer self-compassion as the primary resource"
+      - "Refer to medical and psychological professional support"
+    dont_rules:
+      - "Don't offer medical information or opinions on conditions"
+      - "Don't say 'stay positive' or 'it could be worse'"
+      - "Don't minimize the difficulty of living with illness"
+    contraindications:
+      - "Always defer specific health questions to medical professionals"
+    escalation_rules:
+      - "If illness generates suicidal ideation → escalate to Tier 3"
+
+  - id: passive_death_thoughts
+    title: "Пассивные мысли о смерти / Желание исчезнуть"
+    emotion_signals:
+      - не хочу просыпаться
+      - желаю исчезнуть
+      - хочу исчезнуть
+      - было бы лучше без меня
+      - лучше бы меня не было
+      - не хочу существовать
+      - wish i wasn't here
+      - wish i didn't exist
+      - want to disappear
+      - don't want to wake up
+    risk_signals:
+      - нет смысла жить
+      - не хочу жить
+      - устал жить
+      - устала жить
+      - зачем жить
+    risk_ceiling: 2
+    recommended_techniques: []
+    response_shape: "acknowledge_pain → validate_without_amplifying → crisis_resources → human_referral"
+    do_rules:
+      - "Acknowledge the pain directly and without judgment"
+      - "Do not panic or lecture — stay calm and warm"
+      - "Gently direct toward a human — a trusted person or a crisis line"
+      - "Be brief: this is not a moment for techniques or exercises"
+    dont_rules:
+      - "Don't offer cognitive techniques or exercises in response to passive death wishes"
+      - "Don't dismiss or minimize the thought"
+      - "Don't ask probing questions about plans"
+      - "Don't promise that feelings will go away"
+    contraindications:
+      - "No self-help techniques are appropriate — human referral is the priority"
+    escalation_rules:
+      - "Any indication of active plan or means → escalate to Tier 3 immediately"
+
+  - id: possible_self_harm
+    title: "Возможное самоповреждение (перенаправляющий сценарий)"
+    emotion_signals:
+      - хочу причинить себе вред
+      - порезать себя
+      - бью себя
+      - самоповреждение
+      - want to hurt myself
+      - cutting myself
+      - self-harm
+    risk_signals:
+      - режу себя
+      - причиняю вред себе
+    risk_ceiling: 0
+    recommended_techniques: []
+    response_shape: "crisis_redirect_only"
+    do_rules:
+      - "Redirect immediately to crisis support — not an ordinary support scenario"
+      - "Be brief, warm, and direct about the need for human help"
+    dont_rules:
+      - "Do not offer exercises or techniques"
+      - "Do not attempt to reason with or convince the user"
+      - "Do not continue normal support conversation"
+    contraindications:
+      - "No self-help content is appropriate — this scenario requires human crisis support only"
+    escalation_rules:
+      - "Immediately escalate to Tier 3 or Tier 4 based on severity"
+
+  - id: imminent_danger
+    title: "Непосредственная опасность (перенаправляющий сценарий)"
+    emotion_signals:
+      - я в опасности
+      - угрожают
+      - хотят меня убить
+      - сейчас опасно
+      - i am in danger
+      - threatening me
+      - in immediate danger
+    risk_signals:
+      - прямо сейчас в опасности
+    risk_ceiling: 0
+    recommended_techniques: []
+    response_shape: "emergency_redirect_only"
+    do_rules:
+      - "Immediately refer to emergency services"
+      - "Be extremely brief and action-oriented"
+    dont_rules:
+      - "Do not attempt regular emotional support"
+      - "Do not ask questions — direct to emergency services immediately"
+    contraindications:
+      - "No support content is appropriate — this is a safety emergency"
+    escalation_rules:
+      - "Tier 4 — immediate emergency services"
+
+  - id: general_support
+    title: "Общая эмоциональная поддержка (резервный сценарий)"
+    emotion_signals:
+      - помогите
+      - нужна помощь
+      - плохо
+      - мне плохо
+      - тяжело
+      - тяжело мне
+      - не знаю что делать
+      - трудно
+      - help
+      - need help
+      - feeling bad
+      - not good
+      - hard
+      - difficult
+      - struggling
+    risk_signals: []
+    risk_ceiling: 2
+    recommended_techniques:
+      - labeling_dbt
+      - grounding_54321
+      - next_small_step
+    response_shape: "hear → invite_to_share → validate → gentle_question"
+    do_rules:
+      - "Invite the user to share more about what is happening"
+      - "Validate whatever they share without assumptions"
+      - "Ask one open and gentle question to understand better"
+    dont_rules:
+      - "Don't make assumptions about what is wrong"
+      - "Don't offer solutions before understanding the situation"
+    contraindications: []
+    escalation_rules:
+      - "Apply risk routing based on what user shares next"
