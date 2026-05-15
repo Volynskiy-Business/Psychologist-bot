@@ -79,7 +79,7 @@ class SafetyEvent(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey("users.id"), index=True, nullable=True)
-    telegram_user_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    telegram_user_id: Mapped[Optional[int]] = mapped_column(BigInteger, index=True, nullable=True)
     risk_level: Mapped[RiskLevel] = mapped_column(Enum(RiskLevel))
     risk_type: Mapped[str] = mapped_column(String(64))
     confidence: Mapped[float] = mapped_column(Float)

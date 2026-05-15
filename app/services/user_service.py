@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Message, MoodEntry, RiskLevel, SafetyEvent, User
@@ -121,10 +121,19 @@ async def delete_user_data(telegram_user_id: int) -> DeleteUserDataResult:
         await session.execute(delete(MoodEntry).where(MoodEntry.user_id == user_id))
         await session.execute(delete(Message).where(Message.user_id == user_id))
 
-        # Unlink safety events from the user row; keep rows for crisis audit trail.
-        # TODO: nullify telegram_user_id too after adding nullable column in a migration.
+        # Nullify both FK and direct Telegram identifier on retained audit rows.
+        # Covers post-consent rows (user_id set via FK) and pre-consent rows
+        # (user_id NULL, telegram_user_id set).  Rows are kept for anonymised
+        # crisis audit; no direct identifier survives deletion.
         await session.execute(
-            update(SafetyEvent).where(SafetyEvent.user_id == user_id).values(user_id=None)
+            update(SafetyEvent)
+            .where(
+                or_(
+                    SafetyEvent.user_id == user_id,
+                    SafetyEvent.telegram_user_id == telegram_user_id,
+                )
+            )
+            .values(user_id=None, telegram_user_id=None)
         )
 
         await session.delete(user)
