@@ -1,11 +1,15 @@
 """SQLAlchemy ORM models."""
 
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import BigInteger, DateTime, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+
+def _utc_now_naive() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class Base(DeclarativeBase):
@@ -31,9 +35,9 @@ class User(Base):
     region: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     style_preference: Mapped[str] = mapped_column(String(32), default="soft")
     consent_given: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now_naive)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=_utc_now_naive, onupdate=_utc_now_naive
     )
 
     mood_entries: Mapped[list["MoodEntry"]] = relationship(back_populates="user")
@@ -55,7 +59,7 @@ class MoodEntry(Base):
     thought: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     action_done: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now_naive)
 
     user: Mapped["User"] = relationship(back_populates="mood_entries")
 
@@ -68,7 +72,7 @@ class Message(Base):
     role: Mapped[str] = mapped_column(String(16))  # user / assistant / system
     content: Mapped[str] = mapped_column(Text)
     model_used: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now_naive)
 
     user: Mapped["User"] = relationship(back_populates="messages")
 
@@ -84,7 +88,7 @@ class SafetyEvent(Base):
     reason: Mapped[str] = mapped_column(Text)
     requires_crisis_response: Mapped[bool] = mapped_column(default=False)
     requires_professional_referral: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now_naive)
 
     user: Mapped["User"] = relationship(back_populates="safety_events")
 
@@ -96,7 +100,7 @@ class Feedback(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     rating: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     comment: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now_naive)
 
 
 class ModelCall(Base):
@@ -108,4 +112,4 @@ class ModelCall(Base):
     prompt_tokens: Mapped[int] = mapped_column(Integer)
     completion_tokens: Mapped[int] = mapped_column(Integer)
     error_code: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now_naive)
