@@ -1,10 +1,14 @@
 """Mood diary handler."""
 
+import logging
+
 from aiogram import Router, types
 from aiogram.filters import Command
 
 from app.bot.handlers.i18n import get_text, get_user_language
+from app.services.user_service import save_mood_entry
 
+logger = logging.getLogger(__name__)
 router = Router()
 
 
@@ -28,7 +32,23 @@ async def on_mood_selected(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
     mood = int(callback.data.split("_")[1])
     mood_label = get_text(f"mood.levels.{mood}", lang)
+
+    try:
+        await save_mood_entry(callback.from_user.id, mood)
+        response_text = get_text("mood.saved", lang, mood=mood_label)
+    except Exception:
+        logger.exception("Failed to save mood entry for user %d", callback.from_user.id)
+        response_text = get_text("chat.error", lang)
+
     await callback.message.edit_text(
-        get_text("mood.saved", lang, mood=mood_label)
+        response_text,
+        reply_markup=types.InlineKeyboardMarkup(
+            inline_keyboard=[[
+                types.InlineKeyboardButton(
+                    text=get_text("menu.back_to_menu", lang),
+                    callback_data="back_to_menu",
+                )
+            ]]
+        ),
     )
     await callback.answer()

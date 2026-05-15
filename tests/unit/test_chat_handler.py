@@ -1,4 +1,4 @@
-"""Tests for chat handler — C-1 (system prompt) and C-2 (classifier fallback)."""
+"""Tests for chat handler — C-1 (system prompt), C-2 (classifier fallback), C-3 (consent gate)."""
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -7,9 +7,10 @@ import pytest
 from app.db.models import RiskLevel
 
 
-def _make_message(text: str = "Мне грустно") -> MagicMock:
+def _make_message(text: str = "Мне грустно", user_id: int = 12345) -> MagicMock:
     from_user = MagicMock()
     from_user.language_code = "en"
+    from_user.id = user_id
 
     msg = MagicMock()
     msg.text = text
@@ -35,6 +36,7 @@ async def test_classifier_failure_does_not_proceed_to_llm() -> None:
     mock_classifier.classify = AsyncMock(side_effect=RuntimeError("API timeout"))
 
     with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
         patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
         patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
     ):
@@ -67,6 +69,7 @@ async def test_system_prompt_used_in_chat_completion() -> None:
     mock_classifier.classify = AsyncMock(return_value=mock_classification)
 
     with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
         patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
         patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
     ):
@@ -79,3 +82,190 @@ async def test_system_prompt_used_in_chat_completion() -> None:
     assert system_msg["role"] == "system"
     assert system_msg["content"] == SYSTEM_PROMPT
     assert system_msg["content"] != "openrouter/free"
+
+
+@pytest.mark.asyncio
+async def test_no_consent_blocks_classifier_and_llm() -> None:
+    """C-3: user without consent must not reach classifier or LLM."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("Мне грустно", user_id=99001)
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+    mock_client.chat_completion = AsyncMock()
+
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock()
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=False),
+        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+        patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
+    ):
+        await handle_message(msg)
+
+    mock_classifier.classify.assert_not_called()
+    mock_client.chat_completion.assert_not_called()
+    msg.answer.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_no_consent_reply_contains_consent_button() -> None:
+    """C-3: the consent prompt reply must include the consent_agree keyboard button."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("Привет", user_id=99002)
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=False),
+        patch("app.bot.handlers.chat.OpenRouterClient"),
+    ):
+        await handle_message(msg)
+
+    msg.answer.assert_called_once()
+    call_kwargs = msg.answer.call_args.kwargs
+    keyboard = call_kwargs.get("reply_markup")
+    assert keyboard is not None
+    buttons = [btn for row in keyboard.inline_keyboard for btn in row]
+    assert any(btn.callback_data == "consent_agree" for btn in buttons)
+
+
+@pytest.mark.asyncio
+async def test_consent_allows_chat_path() -> None:
+    """C-3: user with consent proceeds to the normal support flow."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("Расскажи как дышать", user_id=99003)
+
+    fake_response = MagicMock()
+    fake_response.content = "Вот упражнение на дыхание..."
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+    mock_client.chat_completion = AsyncMock(return_value=fake_response)
+
+    mock_classification = MagicMock()
+    mock_classification.risk_level = RiskLevel.NO_RISK
+
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock(return_value=mock_classification)
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
+        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+        patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
+    ):
+        await handle_message(msg)
+
+    mock_client.chat_completion.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_crisis_check_runs_before_consent_gate() -> None:
+    """C-7: deterministic crisis check fires before consent gate — crisis text answered without consent."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("я хочу умереть", user_id=77777)
+
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock()
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+    mock_client.chat_completion = AsyncMock()
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=False),
+        patch("app.bot.handlers.chat.record_safety_event", new_callable=AsyncMock),
+        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+        patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
+    ):
+        await handle_message(msg)
+
+    msg.answer.assert_called_once()
+    mock_classifier.classify.assert_not_called()
+    mock_client.chat_completion.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_crisis_records_safety_event() -> None:
+    """C-8: crisis detection writes a SafetyEvent with correct telegram_user_id."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("я хочу умереть", user_id=55555)
+    mock_record = AsyncMock()
+
+    with (
+        patch("app.bot.handlers.chat.record_safety_event", mock_record),
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=False),
+    ):
+        await handle_message(msg)
+
+    mock_record.assert_called_once()
+    assert mock_record.call_args.kwargs["telegram_user_id"] == 55555
+    msg.answer.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_crisis_response_sent_even_if_safety_event_fails() -> None:
+    """C-9: crisis response is still sent when SafetyEvent DB write raises."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("я хочу умереть", user_id=66666)
+    mock_record = AsyncMock(side_effect=RuntimeError("DB unavailable"))
+
+    with (
+        patch("app.bot.handlers.chat.record_safety_event", mock_record),
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=False),
+    ):
+        await handle_message(msg)
+
+    msg.answer.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_safe_response_content_forwarded_to_user() -> None:
+    """C-10: a clean LLM response passes output validation and is sent verbatim to the user."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("Как снизить тревогу?", user_id=88001)
+
+    fake_response = MagicMock()
+    fake_response.content = "Попробуй дыхательное упражнение: вдох 4 счёта, выдох 6 счётов."
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+    mock_client.chat_completion = AsyncMock(return_value=fake_response)
+
+    mock_classification = MagicMock()
+    mock_classification.risk_level = RiskLevel.NO_RISK
+
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock(return_value=mock_classification)
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
+        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+        patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
+    ):
+        await handle_message(msg)
+
+    msg.answer.assert_called_once_with(fake_response.content)
+
+
+@pytest.mark.asyncio
+async def test_output_validator_not_called_without_consent() -> None:
+    """C-11: validate_support_response is never called when the user has no consent."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("Привет", user_id=88002)
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=False),
+        patch("app.bot.handlers.chat.OpenRouterClient"),
+        patch("app.bot.handlers.chat.validate_support_response") as mock_validator,
+    ):
+        await handle_message(msg)
+
+    mock_validator.assert_not_called()

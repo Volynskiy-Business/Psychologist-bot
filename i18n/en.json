@@ -6,6 +6,7 @@
     "disclaimer": "I am not a doctor, not a psychotherapist and not a crisis service. I do not diagnose or prescribe treatment.",
     "crisis_warning": "If you are in danger or have thoughts of harming yourself/others, contact emergency services, a crisis line or someone nearby.",
     "consent": "By continuing, you confirm that you understand these limitations.",
+    "thanks": "Thanks for your trust. Choose where to start:",
     "buttons": {
       "continue": "✅ I understand, continue",
       "crisis": "🆘 I need urgent help",
@@ -19,7 +20,31 @@
     "mood": "📝 Mood diary",
     "exercises": "🧘 Exercises",
     "safety_plan": "📋 Safety plan",
-    "settings": "⚙️ Settings"
+    "settings": "⚙️ Settings",
+    "back": "🔙 Back",
+    "back_to_menu": "🔙 Back to menu"
+  },
+  "modes": {
+    "chat_intro": "💬 I'm here. Tell me what's on your mind — I'll listen and help you sort through it.\n\nJust type your message.",
+    "anxiety_intro": "😰 I hear you're feeling anxious. That's okay — let's work through this together.\n\nTell me what's going on, or we can do a calming exercise.\n\nJust type your message.",
+    "sad_intro": "😔 I'm sorry you're feeling sad. I'm here with you.\n\nTell me what's happening, or we can try something gentle together.\n\nJust type your message."
+  },
+  "exercises": {
+    "title": "🧘 Exercises\n\nChoose an exercise:",
+    "buttons": {
+      "breathing": "🫁 Box breathing",
+      "cbt": "💭 CBT thought record",
+      "mindfulness": "🌿 Grounding 5-4-3-2-1"
+    },
+    "breathing": "🫁 Box Breathing\n\nThis technique calms the nervous system in 2–3 minutes.\n\n1. Inhale — slowly count to 4\n2. Hold — count to 4\n3. Exhale — slowly count to 4\n4. Hold — count to 4\n\nRepeat 4–6 times. Focus only on counting and your breath. 🌬",
+    "cbt": "💭 CBT Thought Record\n\nHelps examine anxious or intrusive thoughts.\n\nAnswer in your messages:\n\n1. What situation is bothering you?\n2. What automatic thought appeared?\n3. What evidence supports this thought?\n4. What evidence contradicts it?\n5. What's a more balanced way to see it?\n\nWrite your answers — I'll help you work through each step. ✍️",
+    "mindfulness": "🌿 Grounding: 5-4-3-2-1\n\nThis technique brings you back to the present moment.\n\nName aloud or to yourself:\n\n5 things you can SEE right now\n4 things you can TOUCH\n3 sounds you can HEAR\n2 smells you can notice\n1 taste in your mouth\n\nBreathe slowly between each step. 🌱"
+  },
+  "settings": {
+    "title": "⚙️ Settings",
+    "language": "🌐 Interface language",
+    "delete_data": "🗑 Delete my data",
+    "confirm_delete": "Yes, delete everything"
   },
   "crisis": {
     "response": "It seems like this might be an unsafe moment. I cannot replace emergency help, but I can stay with you in chat.\n\nPlease do 3 things now:\n1. Call your local emergency service or crisis line.\n2. Text or call someone nearby: \"I'm not safe alone right now, stay with me.\"\n3. Put away anything you could hurt yourself with.\n\nReply with one word: are you alone right now?",
@@ -38,7 +63,9 @@
   },
   "chat": {
     "prompt": "I'm here. Tell me what's on your mind. I'll listen and help you figure it out.",
-    "error": "Sorry, an error occurred while processing your request. Please try again later or reach out for help."
+    "error": "Sorry, an error occurred while processing your request. Please try again later or reach out for help.",
+    "consent_required": "To chat, please accept the terms of use first.",
+    "output_blocked": "I can't send that response. Please try rephrasing your question or reach out to a qualified specialist for this topic."
   },
   "safety_plan": {
     "title": "📋 Safety Plan",
@@ -57,7 +84,8 @@
   "privacy": {
     "policy": "🔒 Privacy Policy\n\n• We minimize data collection\n• Messages are not stored by default (STORE_CONVERSATIONS=false)\n• You can delete your data with /delete_my_data\n• We do not share data with third parties",
     "delete_confirm": "⚠️ Are you sure you want to delete all your data? This action cannot be undone.",
-    "deleted": "✅ All your data has been deleted."
+    "deleted": "✅ All your data has been deleted.",
+    "not_found": "No stored data was found. Your account may have already been removed."
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
