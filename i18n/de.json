@@ -19,7 +19,9 @@
     "mood": "📝 Stimmungstagebuch",
     "exercises": "🧘 Übungen",
     "safety_plan": "📋 Sicherheitsplan",
-    "settings": "⚙️ Einstellungen"
+    "settings": "⚙️ Einstellungen",
+    "back": "🔙 Zurück",
+    "back_to_menu": "🔙 Zurück zum Menü"
   },
   "crisis": {
     "response": "Es scheint, dass dies ein unsicherer Moment sein könnte. Ich kann keine Notfallhilfe ersetzen, aber ich kann im Chat bei dir bleiben.\n\nBitte tu jetzt 3 Dinge:\n1. Rufe deinen lokalen Notruf oder eine Krisenlinie an.\n2. Schreibe oder rufe jemanden in deiner Nähe an: \"Mir ist gerade nicht sicher allein, bleib bei mir.\"\n3. Lege alles beiseite, womit du dir wehtun könntest.\n\nAntworte mit einem Wort: bist du gerade allein?",

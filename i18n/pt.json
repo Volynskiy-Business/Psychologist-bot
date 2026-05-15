@@ -19,7 +19,9 @@
     "mood": "📝 Diário de humor",
     "exercises": "🧘 Exercícios",
     "safety_plan": "📋 Plano de segurança",
-    "settings": "⚙️ Definições"
+    "settings": "⚙️ Definições",
+    "back": "🔙 Voltar",
+    "back_to_menu": "🔙 Voltar ao menu"
   },
   "crisis": {
     "response": "Parece que pode ser um momento inseguro. Não posso substituir a ajuda de emergência, mas posso ficar contigo no chat.\n\nPor favor, faz 3 coisas agora:\n1. Liga para os serviços de emergência locais ou uma linha de crise.\n2. Envia mensagem ou liga a alguém perto de ti: \"Não estou seguro sozinho agora, fica comigo.\"\n3. Afasta tudo com o que te possas fazer mal.\n\nResponde com uma palavra: estás sozinho agora?",

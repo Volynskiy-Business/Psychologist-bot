@@ -19,7 +19,9 @@
     "mood": "📝 Humørdagbok",
     "exercises": "🧘 Øvelser",
     "safety_plan": "📋 Sikkerhetsplan",
-    "settings": "⚙️ Innstillinger"
+    "settings": "⚙️ Innstillinger",
+    "back": "🔙 Tilbake",
+    "back_to_menu": "🔙 Tilbake til menyen"
   },
   "crisis": {
     "response": "Det ser ut til at dette kan være et utrygt øyeblikk. Jeg kan ikke erstatte nødhjelp, men jeg kan være her i chatten.\n\nVennligst gjør 3 ting nå:\n1. Ring din lokale nødetat eller kriselinje.\n2. Send melding eller ring noen i nærheten: \"Jeg er ikke trygg alene nå, vær med meg.\"\n3. Legg vekk alt du kan skade deg selv med.\n\nSvar med ett ord: er du alene nå?",

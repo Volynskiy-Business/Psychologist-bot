@@ -59,6 +59,8 @@ def test_get_user_language_none_code_falls_back_to_en() -> None:
 
 _REQUIRED_KEYS = [
     "chat.classifier_unavailable",
+    "menu.back",
+    "menu.back_to_menu",
     "mood.add_note_prompt",
     "mood.note_saved",
     "mood.buttons.add_note",

@@ -19,7 +19,9 @@
     "mood": "📝 Humørdagbog",
     "exercises": "🧘 Øvelser",
     "safety_plan": "📋 Sikkerhedsplan",
-    "settings": "⚙️ Indstillinger"
+    "settings": "⚙️ Indstillinger",
+    "back": "🔙 Tilbage",
+    "back_to_menu": "🔙 Tilbage til menuen"
   },
   "crisis": {
     "response": "Det ser ud til, at dette kan være et utrygt øjeblik. Jeg kan ikke erstatte nødhjælp, men jeg kan være her i chatten.\n\nGør venligst 3 ting nu:\n1. Ring til din lokale nødtjeneste eller kriselinje.\n2. Skriv eller ring til nogen i nærheden: \"Jeg er ikke tryg alene lige nu, vær hos mig.\"\n3. Læg alt væk, som du kan skade dig selv med.\n\nSvar med ét ord: er du alene lige nu?",

@@ -19,7 +19,9 @@
     "mood": "📝 Journal d'humeur",
     "exercises": "🧘 Exercices",
     "safety_plan": "📋 Plan de sécurité",
-    "settings": "⚙️ Paramètres"
+    "settings": "⚙️ Paramètres",
+    "back": "🔙 Retour",
+    "back_to_menu": "🔙 Retour au menu"
   },
   "crisis": {
     "response": "Il semble que ce soit un moment dangereux. Je ne peux pas remplacer l'aide d'urgence, mais je peux rester avec toi dans le chat.\n\nS'il te plaît, fais 3 choses maintenant :\n1. Appelle les services d'urgence locaux ou une ligne de crise.\n2. Écris ou appelle quelqu'un près de chez toi : \"Je ne suis pas en sécurité seul en ce moment, reste avec moi.\"\n3. Éloigne tout ce avec quoi tu pourrais te faire du mal.\n\nRéponds par un mot : es-tu seul(e) maintenant ?",
