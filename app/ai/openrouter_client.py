@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 import httpx
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 from app.config import settings
 
@@ -17,6 +17,14 @@ class OpenRouterResponse:
     prompt_tokens: int
     completion_tokens: int
     latency_ms: int
+
+
+def _is_retriable(exc: BaseException) -> bool:
+    if isinstance(exc, httpx.ConnectError):
+        return True
+    if isinstance(exc, httpx.HTTPStatusError):
+        return exc.response.status_code >= 500
+    return False
 
 
 @dataclass
@@ -45,7 +53,7 @@ class OpenRouterClient:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type((httpx.HTTPStatusError, httpx.ConnectError)),
+        retry=retry_if_exception(_is_retriable),
     )
     async def chat_completion(
         self,

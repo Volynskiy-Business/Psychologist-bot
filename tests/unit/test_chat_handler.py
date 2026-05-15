@@ -1,10 +1,17 @@
-"""Tests for chat handler — C-1 (system prompt), C-2 (classifier fallback), C-3 (consent gate)."""
+"""Tests for chat handler — C-1 (system prompt), C-2 (classifier fallback), C-3 (consent gate), C-12/13 (rate limit)."""
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
 
 from app.db.models import RiskLevel
+
+
+def _make_http_status_error(status_code: int) -> httpx.HTTPStatusError:
+    request = httpx.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
+    response = httpx.Response(status_code, request=request)
+    return httpx.HTTPStatusError(str(status_code), request=request, response=response)
 
 
 def _make_message(text: str = "Мне грустно", user_id: int = 12345) -> MagicMock:
@@ -269,3 +276,84 @@ async def test_output_validator_not_called_without_consent() -> None:
         await handle_message(msg)
 
     mock_validator.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_classifier_429_returns_rate_limited_message() -> None:
+    """C-12: HTTP 429 from classifier returns chat.rate_limited, not chat.error."""
+    from app.bot.handlers.chat import handle_message
+    from app.bot.handlers.i18n import get_text
+
+    msg = _make_message("Мне тяжело", user_id=42001)
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+    mock_client.chat_completion = AsyncMock()
+
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock(side_effect=_make_http_status_error(429))
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
+        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+        patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
+    ):
+        await handle_message(msg)
+
+    mock_client.chat_completion.assert_not_called()
+    msg.answer.assert_called_once()
+    assert msg.answer.call_args.args[0] == get_text("chat.rate_limited", "en")
+
+
+@pytest.mark.asyncio
+async def test_classifier_non_429_http_error_fails_closed() -> None:
+    """C-13: non-429 HTTP error from classifier uses chat.error (fail closed)."""
+    from app.bot.handlers.chat import handle_message
+    from app.bot.handlers.i18n import get_text
+
+    msg = _make_message("Мне тяжело", user_id=42002)
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+    mock_client.chat_completion = AsyncMock()
+
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock(side_effect=_make_http_status_error(503))
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
+        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+        patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
+    ):
+        await handle_message(msg)
+
+    mock_client.chat_completion.assert_not_called()
+    msg.answer.assert_called_once()
+    assert msg.answer.call_args.args[0] == get_text("chat.error", "en")
+
+
+@pytest.mark.asyncio
+async def test_crisis_before_consent_no_classifier_no_llm() -> None:
+    """C-14: deterministic crisis fires before consent gate — classifier and LLM never called."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("я хочу умереть", user_id=42003)
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+    mock_client.chat_completion = AsyncMock()
+
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock()
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=False),
+        patch("app.bot.handlers.chat.record_safety_event", new_callable=AsyncMock),
+        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+        patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
+    ):
+        await handle_message(msg)
+
+    mock_classifier.classify.assert_not_called()
+    mock_client.chat_completion.assert_not_called()
+    msg.answer.assert_called_once()

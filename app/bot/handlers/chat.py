@@ -2,6 +2,7 @@
 
 import logging
 
+import httpx
 from aiogram import Router, types
 from aiogram.filters import Command
 
@@ -71,6 +72,15 @@ async def handle_message(message: types.Message) -> None:
             await message.answer(get_crisis_response(classification.risk_level, lang))
             await client.close()
             return
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 429:
+            logger.warning("OpenRouter rate limit; cannot classify safely for user %d", message.from_user.id)
+            await message.answer(get_text("chat.rate_limited", lang))
+        else:
+            logger.exception("Safety classifier failed; failing closed")
+            await message.answer(get_text("chat.error", lang))
+        await client.close()
+        return
     except Exception:
         logger.exception("Safety classifier failed; failing closed")
         await message.answer(get_text("chat.error", lang))

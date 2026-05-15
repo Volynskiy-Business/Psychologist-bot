@@ -65,7 +65,8 @@
     "prompt": "I'm here. Tell me what's on your mind. I'll listen and help you figure it out.",
     "error": "Sorry, an error occurred while processing your request. Please try again later or reach out for help.",
     "consent_required": "To chat, please accept the terms of use first.",
-    "output_blocked": "I can't send that response. Please try rephrasing your question or reach out to a qualified specialist for this topic."
+    "output_blocked": "I can't send that response. Please try rephrasing your question or reach out to a qualified specialist for this topic.",
+    "rate_limited": "I'm temporarily at capacity and can't respond safely right now. Please try again in a little while. If you may be in immediate danger, contact local emergency services or a trusted person near you."
   },
   "safety_plan": {
     "title": "📋 Safety Plan",
