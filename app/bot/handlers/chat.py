@@ -10,8 +10,9 @@ from app.ai.openrouter_client import OpenRouterClient
 from app.ai.output_validation import validate_support_response
 from app.ai.prompts.system_prompt import SYSTEM_PROMPT
 from app.bot.handlers.i18n import get_text, get_user_language
+from app.bot.handlers.mood import consume_note_waiter, is_awaiting_note
 from app.config import settings
-from app.services.user_service import has_consent, record_safety_event
+from app.services.user_service import has_consent, record_safety_event, save_mood_note
 from app.db.models import RiskLevel
 from app.safety.crisis_detector import deterministic_crisis_check
 from app.safety.safety_classifier import SafetyClassifier
@@ -61,6 +62,26 @@ async def handle_message(message: types.Message) -> None:
             ]]
         )
         await message.answer(get_text("chat.consent_required", lang), reply_markup=keyboard)
+        return
+
+    # Step 1c: Mood note interception — save free text as a note, skip LLM
+    if is_awaiting_note(message.from_user.id):
+        consume_note_waiter(message.from_user.id)
+        try:
+            await save_mood_note(message.from_user.id, user_text)
+        except Exception:
+            logger.exception("stage=mood_note Failed to save note")
+        await message.answer(
+            get_text("mood.note_saved", lang),
+            reply_markup=types.InlineKeyboardMarkup(
+                inline_keyboard=[[
+                    types.InlineKeyboardButton(
+                        text=get_text("menu.back_to_menu", lang),
+                        callback_data="back_to_menu",
+                    )
+                ]]
+            ),
+        )
         return
 
     # Step 2: LLM safety classification (for non-obvious cases)

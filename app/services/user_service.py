@@ -86,6 +86,24 @@ async def save_mood_entry(telegram_id: int, mood_score: int) -> None:
         await session.commit()
 
 
+async def save_mood_note(telegram_id: int, note: str) -> None:
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(User).where(User.telegram_id == telegram_id))
+        user = result.scalar_one_or_none()
+        if user is None:
+            return
+        result = await session.execute(
+            select(MoodEntry)
+            .where(MoodEntry.user_id == user.id)
+            .order_by(MoodEntry.created_at.desc())
+            .limit(1)
+        )
+        entry = result.scalar_one_or_none()
+        if entry is not None:
+            entry.notes = note
+            await session.commit()
+
+
 async def record_safety_event(
     *,
     telegram_user_id: int,

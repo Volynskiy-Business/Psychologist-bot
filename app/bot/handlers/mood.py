@@ -11,6 +11,18 @@ from app.services.user_service import save_mood_entry
 logger = logging.getLogger(__name__)
 router = Router()
 
+# In-memory set of user IDs that clicked "Add a note" and haven't typed yet.
+# Lost on restart — degraded to normal chat flow, which is acceptable.
+_awaiting_note: set[int] = set()
+
+
+def is_awaiting_note(user_id: int) -> bool:
+    return user_id in _awaiting_note
+
+
+def consume_note_waiter(user_id: int) -> None:
+    _awaiting_note.discard(user_id)
+
 
 @router.message(Command("mood"))
 async def cmd_mood(message: types.Message) -> None:
@@ -42,6 +54,28 @@ async def on_mood_selected(callback: types.CallbackQuery) -> None:
 
     await callback.message.edit_text(
         response_text,
+        reply_markup=types.InlineKeyboardMarkup(
+            inline_keyboard=[
+                [types.InlineKeyboardButton(
+                    text=get_text("mood.buttons.add_note", lang),
+                    callback_data="add_mood_note",
+                )],
+                [types.InlineKeyboardButton(
+                    text=get_text("menu.back_to_menu", lang),
+                    callback_data="back_to_menu",
+                )],
+            ]
+        ),
+    )
+    await callback.answer()
+
+
+@router.callback_query(lambda c: c.data == "add_mood_note")
+async def on_mood_add_note(callback: types.CallbackQuery) -> None:
+    lang = get_user_language(callback.from_user)
+    _awaiting_note.add(callback.from_user.id)
+    await callback.message.edit_text(
+        get_text("mood.add_note_prompt", lang),
         reply_markup=types.InlineKeyboardMarkup(
             inline_keyboard=[[
                 types.InlineKeyboardButton(

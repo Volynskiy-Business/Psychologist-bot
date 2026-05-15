@@ -6,7 +6,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 
 from app.bot.handlers.i18n import get_text, get_user_language, load_translation
-from app.services.user_service import DeleteUserDataResult, delete_user_data, grant_consent
+from app.services.user_service import DeleteUserDataResult, delete_user_data, grant_consent, has_consent
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +85,9 @@ def main_menu_keyboard(lang: str = "en") -> types.InlineKeyboardMarkup:
 @router.message(Command("start"))
 async def cmd_start(message: types.Message) -> None:
     lang = get_user_language(message.from_user)
+    if await has_consent(message.from_user.id):
+        await message.answer(get_text("start.thanks", lang), reply_markup=main_menu_keyboard(lang))
+        return
     text, keyboard = _start_content(lang)
     await message.answer(text, reply_markup=keyboard)
 

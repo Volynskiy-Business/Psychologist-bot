@@ -53,6 +53,11 @@
   "mood": {
     "question": "📊 How are you feeling right now?",
     "saved": "✅ Saved: {mood}\n\nThanks for the note! Tracking mood helps notice patterns.\n\nWould you like to add a note about what's affecting your state?",
+    "add_note_prompt": "Please type your note below. It will be added to your mood entry.",
+    "note_saved": "✅ Note saved. Take care of yourself! 🌱",
+    "buttons": {
+      "add_note": "📝 Add a note"
+    },
     "levels": {
       "5": "Great 😊",
       "4": "Good 🙂",
