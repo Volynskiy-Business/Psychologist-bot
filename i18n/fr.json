@@ -28,6 +28,11 @@
   "mood": {
     "question": "📊 Comment te sens-tu maintenant ?",
     "saved": "✅ Enregistré : {mood}\n\nMerci pour la note ! Le suivi de l'humeur aide à repérer les patterns.\n\nVeux-tu ajouter une note sur ce qui influence ton état ?",
+    "add_note_prompt": "Tu peux ajouter une courte note sur ce qui a influencé ton humeur aujourd'hui.",
+    "note_saved": "Ta note a été enregistrée.",
+    "buttons": {
+      "add_note": "Ajouter une note"
+    },
     "levels": {
       "5": "Excellent 😊",
       "4": "Bien 🙂",

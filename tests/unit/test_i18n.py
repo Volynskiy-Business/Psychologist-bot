@@ -4,6 +4,8 @@ I-1: get_user_language maps "es" to "es"
 I-2: Spanish locale serves classifier_unavailable in Spanish (not English fallback)
 I-3: Unsupported language code falls back to "en"
 I-4: Missing language_code falls back to "en"
+I-5: All supported locales contain required keys (completeness guard)
+I-6: Spanish language code displays as Español in _LANG_DISPLAY
 """
 
 from unittest.mock import MagicMock
@@ -53,3 +55,33 @@ def test_get_user_language_none_code_falls_back_to_en() -> None:
     """I-4: Missing language_code falls back to 'en'."""
     assert get_user_language(_make_user(None)) == "en"
     assert get_user_language(None) == "en"
+
+
+_REQUIRED_KEYS = [
+    "chat.classifier_unavailable",
+    "mood.add_note_prompt",
+    "mood.note_saved",
+    "mood.buttons.add_note",
+]
+_SUPPORTED_LOCALES = ["en", "ru", "fr", "de", "no", "da", "pt", "es"]
+
+
+@pytest.mark.parametrize("locale", _SUPPORTED_LOCALES)
+@pytest.mark.parametrize("key", _REQUIRED_KEYS)
+def test_locale_contains_required_key(locale: str, key: str) -> None:
+    """I-5: Every supported locale must contain each required key without fallback."""
+    text = get_text(key, locale)
+    en_text = get_text(key, "en")
+    assert text != key, f"Key '{key}' missing from locale '{locale}'"
+    assert text != en_text or locale == "en", (
+        f"Key '{key}' in locale '{locale}' falls back to English — add a translation"
+    )
+
+
+def test_spanish_displays_as_espanol() -> None:
+    """I-6: _LANG_DISPLAY maps 'es' to the Spanish label, not the English fallback."""
+    from app.bot.handlers.start import _LANG_DISPLAY
+
+    assert "es" in _LANG_DISPLAY, "'es' must be present in _LANG_DISPLAY"
+    assert "Español" in _LANG_DISPLAY["es"]
+    assert _LANG_DISPLAY["es"] != _LANG_DISPLAY["en"]

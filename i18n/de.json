@@ -28,6 +28,11 @@
   "mood": {
     "question": "📊 Wie fühlst du dich gerade?",
     "saved": "✅ Gespeichert: {mood}\n\nDanke für den Eintrag! Die Stimmungsverfolgung hilft, Muster zu erkennen.\n\nMöchtest du eine Notiz hinzufügen, was deinen Zustand beeinflusst?",
+    "add_note_prompt": "Du kannst eine kurze Notiz dazu hinzufügen, was deine Stimmung heute beeinflusst hat.",
+    "note_saved": "Deine Notiz wurde gespeichert.",
+    "buttons": {
+      "add_note": "Notiz hinzufügen"
+    },
     "levels": {
       "5": "Großartig 😊",
       "4": "Gut 🙂",

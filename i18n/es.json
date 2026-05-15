@@ -53,6 +53,11 @@
   "mood": {
     "question": "📊 ¿Cómo te sientes ahora mismo?",
     "saved": "✅ Guardado: {mood}\n\n¡Gracias por la nota! Registrar el estado de ánimo ayuda a detectar patrones.\n\n¿Te gustaría añadir una nota sobre lo que está influyendo en tu estado?",
+    "add_note_prompt": "Puedes añadir una breve nota sobre lo que afectó tu estado de ánimo hoy.",
+    "note_saved": "Tu nota se ha guardado.",
+    "buttons": {
+      "add_note": "Añadir una nota"
+    },
     "levels": {
       "5": "Genial 😊",
       "4": "Bien 🙂",

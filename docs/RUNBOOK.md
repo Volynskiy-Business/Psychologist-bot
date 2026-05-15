@@ -65,6 +65,18 @@ If `classifier_model=(fallback to default_model)`, both the classifier and the m
 
 ---
 
+## Mood note — known MVP limitations
+
+### In-memory pending state
+
+Mood note continuation uses an in-memory set (`_awaiting_note` in `app/bot/handlers/mood.py`). If the bot restarts after the user clicks "Add a note" but before they send the note text, the pending state is lost and the next message follows the normal chat flow instead of being saved as a note. This is an acceptable degradation for the current scale.
+
+### Note attachment
+
+Mood notes are attached to the most recent `MoodEntry` for that user (ordered by `created_at DESC LIMIT 1`). If the user submits a note significantly later, it is attached to whichever mood entry was created most recently — not necessarily the one that triggered the "Add a note" prompt.
+
+---
+
 ## Classifier smoke test
 
 Run outside Telegram to verify the classifier is reachable and responding:

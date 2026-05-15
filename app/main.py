@@ -16,6 +16,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+_BOT_COMMANDS = [
+    BotCommand(command="start", description="Main menu / Главное меню"),
+    BotCommand(command="chat", description="Chat / Поговорить"),
+    BotCommand(command="mood", description="Mood diary / Дневник настроения"),
+]
+
+
 def create_dispatcher() -> Dispatcher:
     dp = Dispatcher()
     dp.include_router(start.router)
@@ -29,9 +36,8 @@ async def main() -> None:
     bot = Bot(token=settings.bot_token.get_secret_value())
     dp = create_dispatcher()
 
-    await bot.set_my_commands([
-        BotCommand(command="start", description="Главное меню / Main menu"),
-    ])
+    await bot.set_my_commands(_BOT_COMMANDS)
+    logger.info("Telegram bot commands registered")
 
     logger.info("Starting %s", settings.bot_display_name)
     logger.info(

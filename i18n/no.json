@@ -28,6 +28,11 @@
   "mood": {
     "question": "📊 Hvordan føler du deg nå?",
     "saved": "✅ Lagret: {mood}\n\nTakk for notatet! Å følge humøret hjelper med å legge merke til mønstre.\n\nVil du legge til en notat om hva som påvirker tilstanden din?",
+    "add_note_prompt": "Du kan legge til et kort notat om hva som påvirket humøret ditt i dag.",
+    "note_saved": "Notatet ditt er lagret.",
+    "buttons": {
+      "add_note": "Legg til notat"
+    },
     "levels": {
       "5": "Utmerket 😊",
       "4": "Bra 🙂",

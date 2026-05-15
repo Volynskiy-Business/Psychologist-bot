@@ -262,6 +262,7 @@ _LANG_DISPLAY = {
     "no": "Norsk 🇳🇴",
     "da": "Dansk 🇩🇰",
     "pt": "Português 🇵🇹",
+    "es": "Español 🇪🇸",
 }
 
 

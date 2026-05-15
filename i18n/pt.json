@@ -28,6 +28,11 @@
   "mood": {
     "question": "📊 Como te sentes agora?",
     "saved": "✅ Guardado: {mood}\n\nObrigado pela nota! Acompanhar o humor ajuda a notar padrões.\n\nQueres adicionar uma nota sobre o que influencia o teu estado?",
+    "add_note_prompt": "Podes adicionar uma breve nota sobre o que afetou o teu humor hoje.",
+    "note_saved": "A tua nota foi guardada.",
+    "buttons": {
+      "add_note": "Adicionar nota"
+    },
     "levels": {
       "5": "Excelente 😊",
       "4": "Bem 🙂",
