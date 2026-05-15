@@ -38,7 +38,8 @@
   },
   "chat": {
     "prompt": "Jeg er her. Fortell meg hva som bekymrer deg. Jeg lytter og hjelper deg å forstå.",
-    "error": "Beklager, det oppstod en feil under behandling av forespørselen din. Prøv igjen senere eller be om hjelp."
+    "error": "Beklager, det oppstod en feil under behandling av forespørselen din. Prøv igjen senere eller be om hjelp.",
+    "classifier_unavailable": "Jeg er midlertidig ikke i stand til å behandle meldingen din på en trygg måte. Vennligst prøv igjen senere.\n\nHvis du kan være i umiddelbar fare eller ikke klarer å holde deg trygg, kontakt nødetatene eller en betrodd person i nærheten av deg nå."
   },
   "safety_plan": {
     "title": "📋 Sikkerhetsplan",

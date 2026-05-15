@@ -24,7 +24,8 @@ def _make_message(text: str = "Мне грустно", user_id: int = 12345) -> 
     msg.from_user = from_user
     msg.answer = AsyncMock()
     msg.chat = MagicMock()
-    msg.chat.do_action = AsyncMock()
+    msg.bot = MagicMock()
+    msg.bot.send_chat_action = AsyncMock()
     return msg
 
 
@@ -279,8 +280,8 @@ async def test_output_validator_not_called_without_consent() -> None:
 
 
 @pytest.mark.asyncio
-async def test_classifier_429_returns_rate_limited_message() -> None:
-    """C-12: HTTP 429 from classifier returns chat.rate_limited, not chat.error."""
+async def test_classifier_429_returns_classifier_unavailable_message() -> None:
+    """C-12: HTTP 429 from classifier returns chat.classifier_unavailable (fails closed, never reaches LLM)."""
     from app.bot.handlers.chat import handle_message
     from app.bot.handlers.i18n import get_text
 
@@ -302,12 +303,12 @@ async def test_classifier_429_returns_rate_limited_message() -> None:
 
     mock_client.chat_completion.assert_not_called()
     msg.answer.assert_called_once()
-    assert msg.answer.call_args.args[0] == get_text("chat.rate_limited", "en")
+    assert msg.answer.call_args.args[0] == get_text("chat.classifier_unavailable", "en")
 
 
 @pytest.mark.asyncio
 async def test_classifier_non_429_http_error_fails_closed() -> None:
-    """C-13: non-429 HTTP error from classifier uses chat.error (fail closed)."""
+    """C-13: non-429 HTTP error from classifier uses chat.classifier_unavailable (fail closed)."""
     from app.bot.handlers.chat import handle_message
     from app.bot.handlers.i18n import get_text
 
@@ -329,7 +330,7 @@ async def test_classifier_non_429_http_error_fails_closed() -> None:
 
     mock_client.chat_completion.assert_not_called()
     msg.answer.assert_called_once()
-    assert msg.answer.call_args.args[0] == get_text("chat.error", "en")
+    assert msg.answer.call_args.args[0] == get_text("chat.classifier_unavailable", "en")
 
 
 @pytest.mark.asyncio
@@ -357,3 +358,106 @@ async def test_crisis_before_consent_no_classifier_no_llm() -> None:
     mock_classifier.classify.assert_not_called()
     mock_client.chat_completion.assert_not_called()
     msg.answer.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_settings_classifier_model_wired_to_classifier() -> None:
+    """S-1: settings.classifier_model is passed as model= to SafetyClassifier."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("Как дела?", user_id=50001)
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+
+    mock_classification = MagicMock()
+    mock_classification.risk_level = RiskLevel.NO_RISK
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock(return_value=mock_classification)
+
+    captured: dict = {}
+
+    def _capture_classifier(client, model=None):
+        captured["model"] = model
+        return mock_classifier
+
+    fake_response = MagicMock()
+    fake_response.content = "Всё хорошо!"
+    mock_client.chat_completion = AsyncMock(return_value=fake_response)
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
+        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+        patch("app.bot.handlers.chat.SafetyClassifier", side_effect=_capture_classifier),
+        patch("app.bot.handlers.chat.settings") as mock_settings,
+    ):
+        mock_settings.classifier_model = "test-model/7b"
+        await handle_message(msg)
+
+    assert captured.get("model") == "test-model/7b"
+
+
+@pytest.mark.asyncio
+async def test_empty_classifier_model_passes_none_to_classifier() -> None:
+    """S-2: empty CLASSIFIER_MODEL → model=None passed (client falls back to default_model)."""
+    from app.bot.handlers.chat import handle_message
+
+    msg = _make_message("Как дела?", user_id=50002)
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+
+    mock_classification = MagicMock()
+    mock_classification.risk_level = RiskLevel.NO_RISK
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock(return_value=mock_classification)
+
+    captured: dict = {}
+
+    def _capture_classifier(client, model=None):
+        captured["model"] = model
+        return mock_classifier
+
+    fake_response = MagicMock()
+    fake_response.content = "Всё хорошо!"
+    mock_client.chat_completion = AsyncMock(return_value=fake_response)
+
+    with (
+        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
+        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+        patch("app.bot.handlers.chat.SafetyClassifier", side_effect=_capture_classifier),
+        patch("app.bot.handlers.chat.settings") as mock_settings,
+    ):
+        mock_settings.classifier_model = ""
+        await handle_message(msg)
+
+    assert captured.get("model") is None
+
+
+@pytest.mark.asyncio
+async def test_classifier_429_log_has_stage_no_user_id(caplog) -> None:
+    """S-5: classifier 429 warning has stage label but does not expose raw user ID."""
+    import logging
+
+    from app.bot.handlers.chat import handle_message
+
+    user_id = 50099
+    msg = _make_message("Мне тяжело", user_id=user_id)
+
+    mock_client = MagicMock()
+    mock_client.close = AsyncMock()
+    mock_client.chat_completion = AsyncMock()
+
+    mock_classifier = MagicMock()
+    mock_classifier.classify = AsyncMock(side_effect=_make_http_status_error(429))
+
+    with caplog.at_level(logging.WARNING, logger="app.bot.handlers.chat"):
+        with (
+            patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
+            patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+            patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
+        ):
+            await handle_message(msg)
+
+    assert any("stage=classifier" in r.message for r in caplog.records)
+    assert not any(str(user_id) in r.message for r in caplog.records)

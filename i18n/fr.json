@@ -38,7 +38,8 @@
   },
   "chat": {
     "prompt": "Je suis là. Raconte-moi ce qui te préoccupe. J'écoute et t'aide à comprendre.",
-    "error": "Désolé, une erreur s'est produite lors du traitement de ta demande. Réessaie plus tard ou demande de l'aide."
+    "error": "Désolé, une erreur s'est produite lors du traitement de ta demande. Réessaie plus tard ou demande de l'aide.",
+    "classifier_unavailable": "Je suis temporairement dans l'incapacité de traiter ton message en toute sécurité. Veuillez réessayer plus tard.\n\nSi tu penses être en danger immédiat ou ne pas pouvoir rester en sécurité, contacte les services d'urgence locaux ou une personne de confiance près de toi maintenant."
   },
   "safety_plan": {
     "title": "📋 Plan de sécurité",

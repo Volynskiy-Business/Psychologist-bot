@@ -4,6 +4,7 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.types import BotCommand
 
 from app.bot.handlers import chat, exercises, mood, start
 from app.config import settings
@@ -28,7 +29,16 @@ async def main() -> None:
     bot = Bot(token=settings.bot_token.get_secret_value())
     dp = create_dispatcher()
 
+    await bot.set_my_commands([
+        BotCommand(command="start", description="Главное меню / Main menu"),
+    ])
+
     logger.info("Starting %s", settings.bot_display_name)
+    logger.info(
+        "config: default_model=%s classifier_model=%s",
+        settings.default_model,
+        settings.classifier_model or "(fallback to default_model)",
+    )
     await dp.start_polling(bot)
 
 

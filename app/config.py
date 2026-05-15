@@ -21,6 +21,7 @@ class Settings(BaseSettings):
         "https://openrouter.ai/api/v1", alias="OPENROUTER_BASE_URL"
     )
     default_model: str = Field("openrouter/free", alias="OPENROUTER_MODEL")
+    classifier_model: str = Field("", alias="CLASSIFIER_MODEL")
 
     # Database
     database_url: SecretStr = Field(..., alias="DATABASE_URL")

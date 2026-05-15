@@ -38,7 +38,8 @@
   },
   "chat": {
     "prompt": "Ich bin hier. Erzähl mir, was dir auf dem Herzen liegt. Ich höre zu und helfe dir, es zu verstehen.",
-    "error": "Entschuldigung, bei der Verarbeitung deiner Anfrage ist ein Fehler aufgetreten. Bitte versuche es später noch einmal oder wende dich um Hilfe."
+    "error": "Entschuldigung, bei der Verarbeitung deiner Anfrage ist ein Fehler aufgetreten. Bitte versuche es später noch einmal oder wende dich um Hilfe.",
+    "classifier_unavailable": "Ich bin vorübergehend nicht in der Lage, deine Nachricht sicher zu verarbeiten. Bitte versuche es später noch einmal.\n\nWenn du in unmittelbarer Gefahr sein könntest oder dich nicht sicher fühlst, wende dich jetzt an den Notruf oder eine vertrauenswürdige Person in deiner Nähe."
   },
   "safety_plan": {
     "title": "📋 Sicherheitsplan",

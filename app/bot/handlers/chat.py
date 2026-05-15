@@ -10,6 +10,7 @@ from app.ai.openrouter_client import OpenRouterClient
 from app.ai.output_validation import validate_support_response
 from app.ai.prompts.system_prompt import SYSTEM_PROMPT
 from app.bot.handlers.i18n import get_text, get_user_language
+from app.config import settings
 from app.services.user_service import has_consent, record_safety_event
 from app.db.models import RiskLevel
 from app.safety.crisis_detector import deterministic_crisis_check
@@ -45,7 +46,7 @@ async def handle_message(message: types.Message) -> None:
                 matched_pattern=pattern,
             )
         except Exception:
-            logger.exception("Failed to record safety event for user %d", message.from_user.id)
+            logger.exception("stage=crisis_record Failed to record safety event")
         await message.answer(get_crisis_response(risk_level, lang))
         return
 
@@ -64,7 +65,8 @@ async def handle_message(message: types.Message) -> None:
 
     # Step 2: LLM safety classification (for non-obvious cases)
     client = OpenRouterClient()
-    classifier = SafetyClassifier(client)
+    classifier_model = settings.classifier_model or None
+    classifier = SafetyClassifier(client, model=classifier_model)
 
     try:
         classification = await classifier.classify(user_text)
@@ -74,21 +76,20 @@ async def handle_message(message: types.Message) -> None:
             return
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 429:
-            logger.warning("OpenRouter rate limit; cannot classify safely for user %d", message.from_user.id)
-            await message.answer(get_text("chat.rate_limited", lang))
+            logger.warning("stage=classifier status=429 rate_limited; failing closed")
         else:
-            logger.exception("Safety classifier failed; failing closed")
-            await message.answer(get_text("chat.error", lang))
+            logger.exception("stage=classifier status=%d failing closed", exc.response.status_code)
+        await message.answer(get_text("chat.classifier_unavailable", lang))
         await client.close()
         return
     except Exception:
-        logger.exception("Safety classifier failed; failing closed")
-        await message.answer(get_text("chat.error", lang))
+        logger.exception("stage=classifier exception; failing closed")
+        await message.answer(get_text("chat.classifier_unavailable", lang))
         await client.close()
         return
 
     # Step 3: Normal support flow
-    await message.chat.do_action("typing")
+    await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
 
     try:
         response = await client.chat_completion(
@@ -101,7 +102,7 @@ async def handle_message(message: types.Message) -> None:
         )
         is_safe, block_reason = validate_support_response(response.content)
         if not is_safe:
-            logger.warning("Output blocked for user %d: %s", message.from_user.id, block_reason)
+            logger.warning("stage=output_validation blocked reason=%s", block_reason)
             await message.answer(get_text("chat.output_blocked", lang))
         else:
             await message.answer(response.content)

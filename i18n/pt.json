@@ -38,7 +38,8 @@
   },
   "chat": {
     "prompt": "Estou aqui. Conta-me o que te preocupa. Eu ouço e ajudo a perceber.",
-    "error": "Desculpa, ocorreu um erro ao processar o teu pedido. Tenta mais tarde ou pede ajuda."
+    "error": "Desculpa, ocorreu um erro ao processar o teu pedido. Tenta mais tarde ou pede ajuda.",
+    "classifier_unavailable": "Estou temporariamente incapaz de processar a tua mensagem com segurança. Por favor, tenta novamente mais tarde.\n\nSe podes estar em perigo imediato ou não consegues manter-te seguro, contacta os serviços de emergência locais ou uma pessoa de confiança perto de ti agora."
   },
   "safety_plan": {
     "title": "📋 Plano de segurança",

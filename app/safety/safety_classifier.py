@@ -1,11 +1,16 @@
 """LLM-based safety classification."""
 
 import json
-from typing import Any
+import logging
+from typing import Any, Optional
+
+import httpx
 
 from app.ai.openrouter_client import OpenRouterClient
 from app.ai.prompts.safety_classifier_prompt import SAFETY_CLASSIFIER_PROMPT
 from app.db.models import RiskLevel
+
+logger = logging.getLogger(__name__)
 
 
 class SafetyClassification:
@@ -21,8 +26,9 @@ class SafetyClassification:
 
 
 class SafetyClassifier:
-    def __init__(self, client: OpenRouterClient) -> None:
+    def __init__(self, client: OpenRouterClient, model: Optional[str] = None) -> None:
         self.client = client
+        self.model = model or None
 
     async def classify(self, user_message: str, context: str = "") -> SafetyClassification:
         messages = [
@@ -33,18 +39,37 @@ class SafetyClassifier:
             },
         ]
 
-        response = await self.client.chat_completion(
-            messages=messages,
-            temperature=0.0,
-            max_tokens=200,
-            response_format={"type": "json_object"},
-        )
+        _model_label = self.model or "default"
+
+        try:
+            response = await self.client.chat_completion(
+                messages=messages,
+                model=self.model,
+                temperature=0.0,
+                max_tokens=200,
+                response_format={"type": "json_object"},
+            )
+        except httpx.HTTPStatusError as exc:
+            status = exc.response.status_code
+            if status == 429:
+                logger.warning("stage=classifier error=rate_limited model=%s", _model_label)
+            elif status in (401, 403):
+                logger.error("stage=classifier error=auth_config model=%s status=%d", _model_label, status)
+            else:
+                logger.error("stage=classifier error=http model=%s status=%d", _model_label, status)
+            raise
+        except httpx.TimeoutException:
+            logger.warning("stage=classifier error=timeout model=%s", _model_label)
+            raise
+        except httpx.ConnectError:
+            logger.warning("stage=classifier error=network model=%s", _model_label)
+            raise
 
         try:
             data = json.loads(response.content)
             return SafetyClassification(data)
         except (json.JSONDecodeError, KeyError, ValueError):
-            # Fallback to safe classification
+            logger.warning("stage=classifier error=parse_failed model=%s", _model_label)
             return SafetyClassification(
                 {
                     "risk_level": 2,

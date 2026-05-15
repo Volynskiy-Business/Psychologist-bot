@@ -82,7 +82,8 @@ async def test_chat_handler_sends_output_blocked_message() -> None:
     msg.from_user = from_user
     msg.answer = AsyncMock()
     msg.chat = MagicMock()
-    msg.chat.do_action = AsyncMock()
+    msg.bot = MagicMock()
+    msg.bot.send_chat_action = AsyncMock()
 
     fake_response = MagicMock()
     fake_response.content = "I am your doctor and you have depression disorder."
