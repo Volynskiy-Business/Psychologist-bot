@@ -61,3 +61,6 @@ secrets/
 # Local agent/runtime artifacts
 .backup/
 .claude/
+.ai/
+_diagnostics/
+.venv.broken-*/
