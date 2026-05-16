@@ -1,6 +1,8 @@
 """Main chat handler with safety checks."""
 
 import asyncio
+import hashlib
+import hmac
 import logging
 from typing import Union
 
@@ -8,6 +10,7 @@ import httpx
 from aiogram import Router, types
 from aiogram.filters import Command
 
+from app.ai import tracing
 from app.ai.agents.anxiety_support import AnxietySupportAgent
 from app.ai.agents.friendly_conversation import FriendlyConversationAgent
 from app.ai.agents.sadness_support import SadnessSupportAgent
@@ -65,6 +68,25 @@ def _build_context_str(user_id: int) -> str:
         prefix = "Пользователь" if msg["role"] == "user" else "Бот"
         parts.append(f"{prefix}: {msg['content'][:200]}")
     return "\n".join(parts)
+
+
+def _anon_stable_id(value: int | str, namespace: str) -> str:
+    """HMAC-SHA256 stable anonymous ID scoped by namespace.
+
+    Uses TRACING_SALT so raw Telegram IDs cannot be enumerated even if an attacker
+    knows the algorithm.  Different namespaces produce different IDs for the same value.
+
+    Imports app.config.settings directly (not the module-level name) so test patches
+    of app.bot.handlers.chat.settings do not interfere with the real salt.
+    """
+    from app.config import settings as _cfg  # bypass module-level mock in tests
+    secret = _cfg.tracing_salt.get_secret_value()
+    digest = hmac.new(
+        key=secret.encode(),
+        msg=f"{namespace}:{value}".encode(),
+        digestmod=hashlib.sha256,
+    ).hexdigest()
+    return f"{namespace}_{digest[:16]}"
 
 
 def _back_to_menu_kb(lang: str) -> types.InlineKeyboardMarkup:
@@ -226,56 +248,62 @@ async def handle_message(message: types.Message) -> None:
             user_mode = MODE_SADNESS_SUPPORT
 
     history = _get_history(message.from_user.id)
-    typing_task = asyncio.create_task(_keep_typing(message))
-    try:
-        result = None
-        for model in [settings.default_model] + settings.fallback_models:
-            agent: Union[
-                FriendlyConversationAgent, AnxietySupportAgent,
-                SadnessSupportAgent, SupportPipeline
-            ]
-            if user_mode == MODE_FRIENDLY_CHAT:
-                agent = FriendlyConversationAgent(client, model=model)
-            elif user_mode == MODE_ANXIETY_SUPPORT:
-                agent = AnxietySupportAgent(client, model=model)
-            elif user_mode == MODE_SADNESS_SUPPORT:
-                agent = SadnessSupportAgent(client, model=model)
-            else:
-                agent = SupportPipeline(client, model=model)
-            try:
-                result = await agent.run(user_text, msg_lang, history)
-                logger.debug("stage=support_generation model=%s status=success", model)
-                break
-            except httpx.HTTPStatusError as exc:
+    # Only compute HMAC IDs when Langfuse is active; avoids work and salt access otherwise.
+    _enabled = tracing.is_enabled()
+    with tracing.tracing_context(
+        session_id=_anon_stable_id(message.chat.id, "tg_chat") if _enabled else None,
+        user_id=_anon_stable_id(message.from_user.id, "tg_user") if _enabled else None,
+    ):
+        typing_task = asyncio.create_task(_keep_typing(message))
+        try:
+            result = None
+            for model in [settings.default_model] + settings.fallback_models:
+                agent: Union[
+                    FriendlyConversationAgent, AnxietySupportAgent,
+                    SadnessSupportAgent, SupportPipeline
+                ]
+                if user_mode == MODE_FRIENDLY_CHAT:
+                    agent = FriendlyConversationAgent(client, model=model)
+                elif user_mode == MODE_ANXIETY_SUPPORT:
+                    agent = AnxietySupportAgent(client, model=model)
+                elif user_mode == MODE_SADNESS_SUPPORT:
+                    agent = SadnessSupportAgent(client, model=model)
+                else:
+                    agent = SupportPipeline(client, model=model)
+                try:
+                    result = await agent.run(user_text, msg_lang, history)
+                    logger.debug("stage=support_generation model=%s status=success", model)
+                    break
+                except httpx.HTTPStatusError as exc:
+                    logger.warning(
+                        "stage=support_generation model=%s status=%d; trying next",
+                        model,
+                        exc.response.status_code,
+                    )
+                except Exception:
+                    logger.exception(
+                        "stage=support_generation model=%s status=exception", model
+                    )
+                    break
+            if result is None:
+                await message.answer(
+                    get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang)
+                )
+            elif not result.is_safe:
                 logger.warning(
-                    "stage=support_generation model=%s status=%d; trying next",
-                    model,
-                    exc.response.status_code,
+                    "stage=output_validation blocked reason=%s", result.block_reason
                 )
-            except Exception:
-                logger.exception(
-                    "stage=support_generation model=%s status=exception", model
+                await message.answer(
+                    get_text("chat.output_blocked", lang),
+                    reply_markup=_back_to_menu_kb(lang),
                 )
-                break
-        if result is None:
+            else:
+                _record_exchange(message.from_user.id, user_text, result.content)
+                await message.answer(result.content, reply_markup=feedback_keyboard(lang))
+        except Exception:
             await message.answer(
                 get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang)
             )
-        elif not result.is_safe:
-            logger.warning(
-                "stage=output_validation blocked reason=%s", result.block_reason
-            )
-            await message.answer(
-                get_text("chat.output_blocked", lang),
-                reply_markup=_back_to_menu_kb(lang),
-            )
-        else:
-            _record_exchange(message.from_user.id, user_text, result.content)
-            await message.answer(result.content, reply_markup=feedback_keyboard(lang))
-    except Exception:
-        await message.answer(
-            get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang)
-        )
-    finally:
-        typing_task.cancel()
-        await client.close()
+        finally:
+            typing_task.cancel()
+            await client.close()

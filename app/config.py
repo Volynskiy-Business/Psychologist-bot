@@ -56,10 +56,26 @@ class Settings(BaseSettings):
     langfuse_secret_key: Optional[SecretStr] = Field(None, alias="LANGFUSE_SECRET_KEY")
     langfuse_host: str = Field("https://cloud.langfuse.com", alias="LANGFUSE_HOST")
     langfuse_log_content: bool = Field(False, alias="LANGFUSE_LOG_CONTENT")
+    # Salt for HMAC-SHA256 anonymisation of Telegram IDs sent to Langfuse.
+    # Change to a random secret in production; default only used in dev/test.
+    tracing_salt: SecretStr = Field("change-me-in-production", alias="TRACING_SALT")
 
     @property
     def is_production(self) -> bool:
         return self.app_env.lower() == "production"
+
+    @model_validator(mode="after")
+    def _reject_weak_tracing_salt_in_production(self) -> "Settings":
+        langfuse_enabled = bool(self.langfuse_public_key and self.langfuse_secret_key)
+        if self.is_production and langfuse_enabled:
+            salt = self.tracing_salt.get_secret_value()
+            if not salt or salt == "change-me-in-production":
+                raise ValueError(
+                    "TRACING_SALT must be set to a random secret in production "
+                    "when Langfuse is enabled. "
+                    "Generate one with: python3 -c \"import secrets; print(secrets.token_hex(32))\""
+                )
+        return self
 
     @model_validator(mode="after")
     def _reject_free_models_unless_allowed(self) -> "Settings":

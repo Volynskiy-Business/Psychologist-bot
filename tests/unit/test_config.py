@@ -134,3 +134,49 @@ def test_empty_fallback_models_returns_empty_list() -> None:
         OPENROUTER_FALLBACK_MODELS="",
     )
     assert s.fallback_models == []
+
+
+# --- TRACING_SALT production guard ---
+
+_PROD_WITH_LANGFUSE = dict(
+    APP_ENV="production",
+    OPENROUTER_MODEL="google/gemini-2.5-flash-lite",
+    LANGFUSE_PUBLIC_KEY="pk-test",
+    LANGFUSE_SECRET_KEY="sk-test",
+)
+
+
+def test_production_langfuse_rejects_default_tracing_salt() -> None:
+    with pytest.raises(ValidationError, match="TRACING_SALT"):
+        _make(**_PROD_WITH_LANGFUSE, TRACING_SALT="change-me-in-production")
+
+
+def test_production_langfuse_rejects_empty_tracing_salt() -> None:
+    with pytest.raises(ValidationError, match="TRACING_SALT"):
+        _make(**_PROD_WITH_LANGFUSE, TRACING_SALT="")
+
+
+def test_production_langfuse_accepts_real_tracing_salt() -> None:
+    s = _make(**_PROD_WITH_LANGFUSE, TRACING_SALT="a" * 64)
+    assert s.tracing_salt.get_secret_value() == "a" * 64
+
+
+def test_production_no_langfuse_allows_default_tracing_salt() -> None:
+    s = _make(
+        APP_ENV="production",
+        OPENROUTER_MODEL="google/gemini-2.5-flash-lite",
+        TRACING_SALT="change-me-in-production",
+    )
+    assert s.tracing_salt.get_secret_value() == "change-me-in-production"
+
+
+def test_development_allows_default_tracing_salt_with_langfuse() -> None:
+    s = _make(
+        APP_ENV="development",
+        OPENROUTER_MODEL="google/gemini-2.5-flash-lite",
+        ALLOW_FREE_MODELS="true",
+        LANGFUSE_PUBLIC_KEY="pk-test",
+        LANGFUSE_SECRET_KEY="sk-test",
+        TRACING_SALT="change-me-in-production",
+    )
+    assert s.tracing_salt.get_secret_value() == "change-me-in-production"

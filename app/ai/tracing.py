@@ -1,10 +1,15 @@
-"""Optional Langfuse tracing for LLM calls (compatible with langfuse>=3.0).
+"""Optional Langfuse tracing for LLM calls (compatible with langfuse>=4.0).
 
 Activated only when LANGFUSE_PUBLIC_KEY + LANGFUSE_SECRET_KEY are set.
 By default, message content is NOT sent to Langfuse (LANGFUSE_LOG_CONTENT=false).
 Only performance metrics (model, tokens, latency) are recorded.
+
+Best-practice usage:
+    with tracing.tracing_context(session_id=chat_id, user_id=anon_id):
+        response = await llm_call(...)   # trace_generation() called inside
 """
 
+import contextlib
 import logging
 from typing import Any, Optional
 
@@ -73,3 +78,50 @@ def trace_generation(
             pass
     except Exception:
         logger.exception("stage=langfuse status=trace_failed")
+
+
+def tracing_context(
+    *,
+    session_id: Optional[str] = None,
+    user_id: Optional[str] = None,
+):
+    """Return a context manager that propagates session/user to all Langfuse spans.
+
+    Use with ``with`` around LLM calls so every generation is tagged with
+    the Telegram session and anonymised user identifier, enabling per-user and
+    per-session cost/quality analytics in Langfuse.
+
+    No-ops silently when Langfuse is not configured or no attributes are provided.
+    """
+    client = _get_client()
+    if client is None or (session_id is None and user_id is None):
+        return contextlib.nullcontext()
+    try:
+        from langfuse import propagate_attributes
+
+        kwargs: dict[str, str] = {}
+        if session_id is not None:
+            kwargs["session_id"] = session_id
+        if user_id is not None:
+            kwargs["user_id"] = user_id
+        return propagate_attributes(**kwargs)
+    except Exception:
+        logger.exception("stage=langfuse status=context_failed")
+        return contextlib.nullcontext()
+
+
+def is_enabled() -> bool:
+    """Return True when Langfuse is configured and initialised."""
+    return _get_client() is not None
+
+
+def flush() -> None:
+    """Flush buffered Langfuse events. Call on graceful shutdown."""
+    client = _get_client()
+    if client is None:
+        return
+    try:
+        client.flush()
+        logger.info("stage=langfuse status=flushed")
+    except Exception:
+        logger.exception("stage=langfuse status=flush_failed")

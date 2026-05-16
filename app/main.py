@@ -6,6 +6,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
 
+from app.ai import tracing
 from app.bot.handlers import chat, exercises, feedback, mood, safety_plan, start
 from app.config import settings
 
@@ -47,7 +48,10 @@ async def main() -> None:
         settings.default_model,
         settings.classifier_model or "(disabled)",
     )
-    await dp.start_polling(bot)
+    try:
+        await dp.start_polling(bot)
+    finally:
+        tracing.flush()
 
 
 if __name__ == "__main__":
