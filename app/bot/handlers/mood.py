@@ -29,11 +29,31 @@ async def cmd_mood(message: types.Message) -> None:
     lang = get_user_language(message.from_user)
     keyboard = types.InlineKeyboardMarkup(
         inline_keyboard=[
-            [types.InlineKeyboardButton(text=get_text("mood.levels.5", lang), callback_data="mood_5")],
-            [types.InlineKeyboardButton(text=get_text("mood.levels.4", lang), callback_data="mood_4")],
-            [types.InlineKeyboardButton(text=get_text("mood.levels.3", lang), callback_data="mood_3")],
-            [types.InlineKeyboardButton(text=get_text("mood.levels.2", lang), callback_data="mood_2")],
-            [types.InlineKeyboardButton(text=get_text("mood.levels.1", lang), callback_data="mood_1")],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.5", lang), callback_data="mood_5"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.4", lang), callback_data="mood_4"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.3", lang), callback_data="mood_3"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.2", lang), callback_data="mood_2"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.1", lang), callback_data="mood_1"
+                )
+            ],
         ]
     )
     await message.answer(get_text("mood.question", lang), reply_markup=keyboard)
@@ -56,14 +76,18 @@ async def on_mood_selected(callback: types.CallbackQuery) -> None:
         response_text,
         reply_markup=types.InlineKeyboardMarkup(
             inline_keyboard=[
-                [types.InlineKeyboardButton(
-                    text=get_text("mood.buttons.add_note", lang),
-                    callback_data="add_mood_note",
-                )],
-                [types.InlineKeyboardButton(
-                    text=get_text("menu.back_to_menu", lang),
-                    callback_data="back_to_menu",
-                )],
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("mood.buttons.add_note", lang),
+                        callback_data="add_mood_note",
+                    )
+                ],
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("menu.back_to_menu", lang),
+                        callback_data="back_to_menu",
+                    )
+                ],
             ]
         ),
     )
@@ -77,12 +101,14 @@ async def on_mood_add_note(callback: types.CallbackQuery) -> None:
     await callback.message.edit_text(
         get_text("mood.add_note_prompt", lang),
         reply_markup=types.InlineKeyboardMarkup(
-            inline_keyboard=[[
-                types.InlineKeyboardButton(
-                    text=get_text("menu.back_to_menu", lang),
-                    callback_data="back_to_menu",
-                )
-            ]]
+            inline_keyboard=[
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("menu.back_to_menu", lang),
+                        callback_data="back_to_menu",
+                    )
+                ]
+            ]
         ),
     )
     await callback.answer()

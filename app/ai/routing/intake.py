@@ -45,9 +45,21 @@ _TIER_2_SIGNALS: list[str] = [
 
 # Intensity modifier words — boost calculated intensity score.
 _INTENSITY_BOOSTERS: list[str] = [
-    "очень", "крайне", "невыносимо", "ужасно", "совсем", "сильно",
-    "очень сильно", "дико", "жутко",
-    "very", "extremely", "terribly", "so", "really", "incredibly",
+    "очень",
+    "крайне",
+    "невыносимо",
+    "ужасно",
+    "совсем",
+    "сильно",
+    "очень сильно",
+    "дико",
+    "жутко",
+    "very",
+    "extremely",
+    "terribly",
+    "so",
+    "really",
+    "incredibly",
 ]
 
 
@@ -166,11 +178,16 @@ def classify_intake(text: str, lang: str = "") -> IntakeResult:
     detected_emotion, scenario_id, intensity = _detect_scenario(text)
 
     # Get scenario-specific risk signals for the matched scenario
-    from app.ai.scenarios.loader import get_scenario  # local to avoid top-level circular
+    from app.ai.scenarios.loader import (
+        get_scenario,
+    )  # local to avoid top-level circular
+
     scenario = get_scenario(scenario_id)
     scenario_risk_signals = scenario.risk_signals if scenario else []
 
-    risk_tier, risk_signals = _detect_risk_tier(text, scenario_id, scenario_risk_signals)
+    risk_tier, risk_signals = _detect_risk_tier(
+        text, scenario_id, scenario_risk_signals
+    )
 
     return IntakeResult(
         language=lang,

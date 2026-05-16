@@ -35,7 +35,9 @@ class Settings(BaseSettings):
     redis_url: RedisDsn = Field("redis://redis:6379/0", alias="REDIS_URL")
 
     # Admin
-    admin_telegram_ids: list[int] = Field(default_factory=list, alias="ADMIN_TELEGRAM_IDS")
+    admin_telegram_ids: list[int] = Field(
+        default_factory=list, alias="ADMIN_TELEGRAM_IDS"
+    )
 
     # Privacy
     store_conversations: bool = Field(False, alias="STORE_CONVERSATIONS")

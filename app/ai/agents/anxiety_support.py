@@ -170,11 +170,15 @@ class AnxietySupportAgent:
                 )
                 draft = rewrite.content
             except Exception:
-                logger.exception("stage=anxiety_support_rewrite failed; using original draft")
+                logger.exception(
+                    "stage=anxiety_support_rewrite failed; using original draft"
+                )
 
         is_safe, block_reason = validate_support_response(draft)
         if not is_safe:
-            logger.warning("stage=anxiety_support_validation blocked reason=%s", block_reason)
+            logger.warning(
+                "stage=anxiety_support_validation blocked reason=%s", block_reason
+            )
 
         return PipelineResult(
             content=draft,

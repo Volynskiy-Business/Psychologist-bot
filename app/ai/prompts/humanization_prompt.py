@@ -46,8 +46,4 @@ def build_humanization_prompt(draft: str, user_message: str, lang: str) -> str:
             f"Сообщение пользователя:\n{user_message}\n\n"
             f"Черновик ответа:\n{draft}"
         )
-    return (
-        f"{base}\n\n"
-        f"User message:\n{user_message}\n\n"
-        f"Draft response:\n{draft}"
-    )
+    return f"{base}\n\nUser message:\n{user_message}\n\nDraft response:\n{draft}"

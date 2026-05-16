@@ -92,7 +92,9 @@ async def save_mood_entry(telegram_id: int, mood_score: int) -> None:
 
 async def save_mood_note(telegram_id: int, note: str) -> None:
     async with AsyncSessionLocal() as session:
-        result = await session.execute(select(User).where(User.telegram_id == telegram_id))
+        result = await session.execute(
+            select(User).where(User.telegram_id == telegram_id)
+        )
         user = result.scalar_one_or_none()
         if user is None:
             return

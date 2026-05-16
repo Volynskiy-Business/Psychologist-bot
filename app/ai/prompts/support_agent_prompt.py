@@ -77,7 +77,9 @@ def build_support_prompt(
 ) -> str:
     """Build a focused system prompt injected with scenario and technique context."""
     parts = [_BASE]
-    parts.append(f"\nЯЗЫК ТЕКУЩЕГО ОТВЕТА: «{intake.language}». Используй ТОЛЬКО этот язык.")
+    parts.append(
+        f"\nЯЗЫК ТЕКУЩЕГО ОТВЕТА: «{intake.language}». Используй ТОЛЬКО этот язык."
+    )
 
     if scenario:
         parts.append(f"\n━━━ ТЕКУЩИЙ СЦЕНАРИЙ ━━━\n{scenario.title}")

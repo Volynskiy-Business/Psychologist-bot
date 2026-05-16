@@ -36,7 +36,9 @@ class SafetyClassifier:
         self.model = model or None
         self.fallback_models = fallback_models or []
 
-    async def classify(self, user_message: str, context: str = "") -> SafetyClassification:
+    async def classify(
+        self, user_message: str, context: str = ""
+    ) -> SafetyClassification:
         messages = [
             {"role": "system", "content": SAFETY_CLASSIFIER_PROMPT},
             {
@@ -45,7 +47,9 @@ class SafetyClassifier:
             },
         ]
 
-        models_to_try = [self.model] + [m for m in self.fallback_models if m != self.model]
+        models_to_try = [self.model] + [
+            m for m in self.fallback_models if m != self.model
+        ]
         last_exc: Optional[Exception] = None
 
         for model in models_to_try:
@@ -60,26 +64,43 @@ class SafetyClassifier:
             except httpx.HTTPStatusError as exc:
                 status = exc.response.status_code
                 if status == 429:
-                    logger.warning("stage=classifier error=rate_limited model=%s; trying next", model or "default")
+                    logger.warning(
+                        "stage=classifier error=rate_limited model=%s; trying next",
+                        model or "default",
+                    )
                     last_exc = exc
                     continue
                 if status in (401, 403):
-                    logger.error("stage=classifier error=auth_config model=%s status=%d", model or "default", status)
+                    logger.error(
+                        "stage=classifier error=auth_config model=%s status=%d",
+                        model or "default",
+                        status,
+                    )
                 else:
-                    logger.error("stage=classifier error=http model=%s status=%d", model or "default", status)
+                    logger.error(
+                        "stage=classifier error=http model=%s status=%d",
+                        model or "default",
+                        status,
+                    )
                 raise
             except httpx.TimeoutException:
-                logger.warning("stage=classifier error=timeout model=%s", model or "default")
+                logger.warning(
+                    "stage=classifier error=timeout model=%s", model or "default"
+                )
                 raise
             except httpx.ConnectError:
-                logger.warning("stage=classifier error=network model=%s", model or "default")
+                logger.warning(
+                    "stage=classifier error=network model=%s", model or "default"
+                )
                 raise
 
             try:
                 data = json.loads(response.content)
                 return SafetyClassification(data)
             except (json.JSONDecodeError, KeyError, ValueError):
-                logger.warning("stage=classifier error=parse_failed model=%s", model or "default")
+                logger.warning(
+                    "stage=classifier error=parse_failed model=%s", model or "default"
+                )
                 return SafetyClassification(
                     {
                         "risk_level": 2,
@@ -91,5 +112,7 @@ class SafetyClassifier:
                     }
                 )
 
-        logger.error("stage=classifier error=all_models_rate_limited models=%s", models_to_try)
+        logger.error(
+            "stage=classifier error=all_models_rate_limited models=%s", models_to_try
+        )
         raise last_exc  # type: ignore[misc]

@@ -6,8 +6,18 @@ from aiogram import Router, types
 from aiogram.filters import Command
 
 from app.bot.handlers.i18n import get_text, get_user_language, load_translation
-from app.bot.user_state import MODE_ANXIETY_SUPPORT, MODE_FRIENDLY_CHAT, clear_mode, set_mode
-from app.services.user_service import DeleteUserDataResult, delete_user_data, grant_consent, has_consent
+from app.bot.user_state import (
+    MODE_ANXIETY_SUPPORT,
+    MODE_FRIENDLY_CHAT,
+    clear_mode,
+    set_mode,
+)
+from app.services.user_service import (
+    DeleteUserDataResult,
+    delete_user_data,
+    grant_consent,
+    has_consent,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -16,12 +26,14 @@ router = Router()
 
 def _back_to_menu_keyboard(lang: str) -> types.InlineKeyboardMarkup:
     return types.InlineKeyboardMarkup(
-        inline_keyboard=[[
-            types.InlineKeyboardButton(
-                text=get_text("menu.back_to_menu", lang),
-                callback_data="back_to_menu",
-            )
-        ]]
+        inline_keyboard=[
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.back_to_menu", lang),
+                    callback_data="back_to_menu",
+                )
+            ]
+        ]
     )
 
 
@@ -36,18 +48,24 @@ def _start_content(lang: str) -> tuple[str, types.InlineKeyboardMarkup]:
     )
     keyboard = types.InlineKeyboardMarkup(
         inline_keyboard=[
-            [types.InlineKeyboardButton(
-                text=get_text("start.buttons.continue", lang),
-                callback_data="consent_agree",
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("start.buttons.crisis", lang),
-                callback_data="crisis_help",
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("start.buttons.privacy", lang),
-                callback_data="privacy_policy",
-            )],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("start.buttons.continue", lang),
+                    callback_data="consent_agree",
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("start.buttons.crisis", lang),
+                    callback_data="crisis_help",
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("start.buttons.privacy", lang),
+                    callback_data="privacy_policy",
+                )
+            ],
         ]
     )
     return text, keyboard
@@ -56,44 +74,63 @@ def _start_content(lang: str) -> tuple[str, types.InlineKeyboardMarkup]:
 def main_menu_keyboard(lang: str = "en") -> types.InlineKeyboardMarkup:
     return types.InlineKeyboardMarkup(
         inline_keyboard=[
-            [types.InlineKeyboardButton(
-                text=get_text("menu.chat", lang), callback_data="mode_chat"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("menu.anxiety", lang), callback_data="mode_anxiety"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("menu.sad", lang), callback_data="mode_sad"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("menu.mood", lang), callback_data="mode_mood"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("menu.exercises", lang), callback_data="mode_exercises"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("menu.safety_plan", lang), callback_data="safety_plan"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("menu.settings", lang), callback_data="settings"
-            )],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.chat", lang), callback_data="mode_chat"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.anxiety", lang), callback_data="mode_anxiety"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.sad", lang), callback_data="mode_sad"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.mood", lang), callback_data="mode_mood"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.exercises", lang),
+                    callback_data="mode_exercises",
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.safety_plan", lang), callback_data="safety_plan"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.settings", lang), callback_data="settings"
+                )
+            ],
         ]
     )
 
 
 # ── /start command ────────────────────────────────────────────────────────────
 
+
 @router.message(Command("start"))
 async def cmd_start(message: types.Message) -> None:
     lang = get_user_language(message.from_user)
     if await has_consent(message.from_user.id):
-        await message.answer(get_text("start.thanks", lang), reply_markup=main_menu_keyboard(lang))
+        await message.answer(
+            get_text("start.thanks", lang), reply_markup=main_menu_keyboard(lang)
+        )
         return
     text, keyboard = _start_content(lang)
     await message.answer(text, reply_markup=keyboard)
 
 
 # ── Consent screen callbacks ──────────────────────────────────────────────────
+
 
 @router.callback_query(lambda c: c.data == "consent_agree")
 async def on_consent_agree(callback: types.CallbackQuery) -> None:
@@ -117,12 +154,14 @@ async def on_crisis_help(callback: types.CallbackQuery) -> None:
     await callback.message.edit_text(
         "🆘 " + get_text("crisis.response", lang),
         reply_markup=types.InlineKeyboardMarkup(
-            inline_keyboard=[[
-                types.InlineKeyboardButton(
-                    text=get_text("menu.back", lang),
-                    callback_data="back_to_start",
-                )
-            ]]
+            inline_keyboard=[
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("menu.back", lang),
+                        callback_data="back_to_start",
+                    )
+                ]
+            ]
         ),
     )
     await callback.answer()
@@ -134,12 +173,14 @@ async def on_privacy_policy(callback: types.CallbackQuery) -> None:
     await callback.message.edit_text(
         get_text("privacy.policy", lang),
         reply_markup=types.InlineKeyboardMarkup(
-            inline_keyboard=[[
-                types.InlineKeyboardButton(
-                    text=get_text("menu.back", lang),
-                    callback_data="back_to_start",
-                )
-            ]]
+            inline_keyboard=[
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("menu.back", lang),
+                        callback_data="back_to_start",
+                    )
+                ]
+            ]
         ),
     )
     await callback.answer()
@@ -155,6 +196,7 @@ async def on_back_to_start(callback: types.CallbackQuery) -> None:
 
 # ── Main menu navigation ──────────────────────────────────────────────────────
 
+
 @router.callback_query(lambda c: c.data == "back_to_menu")
 async def on_back_to_menu(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
@@ -167,6 +209,7 @@ async def on_back_to_menu(callback: types.CallbackQuery) -> None:
 
 
 # ── Chat / support mode intros ────────────────────────────────────────────────
+
 
 @router.callback_query(lambda c: c.data == "mode_chat")
 async def on_mode_chat(callback: types.CallbackQuery) -> None:
@@ -203,30 +246,43 @@ async def on_mode_sad(callback: types.CallbackQuery) -> None:
 
 # ── Mood diary from menu ──────────────────────────────────────────────────────
 
+
 @router.callback_query(lambda c: c.data == "mode_mood")
 async def on_mode_mood(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
     keyboard = types.InlineKeyboardMarkup(
         inline_keyboard=[
-            [types.InlineKeyboardButton(
-                text=get_text("mood.levels.5", lang), callback_data="mood_5"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("mood.levels.4", lang), callback_data="mood_4"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("mood.levels.3", lang), callback_data="mood_3"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("mood.levels.2", lang), callback_data="mood_2"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("mood.levels.1", lang), callback_data="mood_1"
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("menu.back_to_menu", lang),
-                callback_data="back_to_menu",
-            )],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.5", lang), callback_data="mood_5"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.4", lang), callback_data="mood_4"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.3", lang), callback_data="mood_3"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.2", lang), callback_data="mood_2"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("mood.levels.1", lang), callback_data="mood_1"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.back_to_menu", lang),
+                    callback_data="back_to_menu",
+                )
+            ],
         ]
     )
     await callback.message.edit_text(
@@ -237,6 +293,7 @@ async def on_mode_mood(callback: types.CallbackQuery) -> None:
 
 
 # ── Safety plan ───────────────────────────────────────────────────────────────
+
 
 @router.callback_query(lambda c: c.data == "safety_plan")
 async def on_safety_plan(callback: types.CallbackQuery) -> None:
@@ -286,14 +343,18 @@ async def on_settings(callback: types.CallbackQuery) -> None:
         text,
         reply_markup=types.InlineKeyboardMarkup(
             inline_keyboard=[
-                [types.InlineKeyboardButton(
-                    text=get_text("settings.delete_data", lang),
-                    callback_data="delete_my_data",
-                )],
-                [types.InlineKeyboardButton(
-                    text=get_text("menu.back_to_menu", lang),
-                    callback_data="back_to_menu",
-                )],
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("settings.delete_data", lang),
+                        callback_data="delete_my_data",
+                    )
+                ],
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("menu.back_to_menu", lang),
+                        callback_data="back_to_menu",
+                    )
+                ],
             ]
         ),
     )
@@ -307,14 +368,18 @@ async def on_delete_my_data(callback: types.CallbackQuery) -> None:
         get_text("privacy.delete_confirm", lang),
         reply_markup=types.InlineKeyboardMarkup(
             inline_keyboard=[
-                [types.InlineKeyboardButton(
-                    text=get_text("settings.confirm_delete", lang),
-                    callback_data="delete_confirmed",
-                )],
-                [types.InlineKeyboardButton(
-                    text=get_text("menu.back", lang),
-                    callback_data="back_to_menu",
-                )],
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("settings.confirm_delete", lang),
+                        callback_data="delete_confirmed",
+                    )
+                ],
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("menu.back", lang),
+                        callback_data="back_to_menu",
+                    )
+                ],
             ]
         ),
     )

@@ -78,7 +78,9 @@ class SupportPipeline:
                 intake.scenario_id,
             )
             try:
-                humanization_prompt = build_humanization_prompt(draft, user_text, intake.language)
+                humanization_prompt = build_humanization_prompt(
+                    draft, user_text, intake.language
+                )
                 rewrite_response = await self.client.chat_completion(
                     messages=[{"role": "user", "content": humanization_prompt}],
                     model=self.model,

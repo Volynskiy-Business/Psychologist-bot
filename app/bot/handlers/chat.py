@@ -57,12 +57,14 @@ def _build_context_str(user_id: int) -> str:
 
 def _back_to_menu_kb(lang: str) -> types.InlineKeyboardMarkup:
     return types.InlineKeyboardMarkup(
-        inline_keyboard=[[
-            types.InlineKeyboardButton(
-                text=get_text("menu.back_to_menu", lang),
-                callback_data="back_to_menu",
-            )
-        ]]
+        inline_keyboard=[
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.back_to_menu", lang),
+                    callback_data="back_to_menu",
+                )
+            ]
+        ]
     )
 
 
@@ -119,14 +121,18 @@ async def handle_message(message: types.Message) -> None:
     # Step 1b: Consent gate — block LLM/classifier until user accepts terms
     if not await has_consent(message.from_user.id):
         keyboard = types.InlineKeyboardMarkup(
-            inline_keyboard=[[
-                types.InlineKeyboardButton(
-                    text=get_text("start.buttons.continue", lang),
-                    callback_data="consent_agree",
-                )
-            ]]
+            inline_keyboard=[
+                [
+                    types.InlineKeyboardButton(
+                        text=get_text("start.buttons.continue", lang),
+                        callback_data="consent_agree",
+                    )
+                ]
+            ]
         )
-        await message.answer(get_text("chat.consent_required", lang), reply_markup=keyboard)
+        await message.answer(
+            get_text("chat.consent_required", lang), reply_markup=keyboard
+        )
         return
 
     # Step 1c: Mood note interception — save free text as a note, skip LLM
@@ -139,12 +145,14 @@ async def handle_message(message: types.Message) -> None:
         await message.answer(
             get_text("mood.note_saved", lang),
             reply_markup=types.InlineKeyboardMarkup(
-                inline_keyboard=[[
-                    types.InlineKeyboardButton(
-                        text=get_text("menu.back_to_menu", lang),
-                        callback_data="back_to_menu",
-                    )
-                ]]
+                inline_keyboard=[
+                    [
+                        types.InlineKeyboardButton(
+                            text=get_text("menu.back_to_menu", lang),
+                            callback_data="back_to_menu",
+                        )
+                    ]
+                ]
             ),
         )
         return
@@ -153,26 +161,41 @@ async def handle_message(message: types.Message) -> None:
     client = OpenRouterClient()
     if settings.classifier_model:
         classifier = SafetyClassifier(
-            client, model=settings.classifier_model, fallback_models=settings.fallback_models
+            client,
+            model=settings.classifier_model,
+            fallback_models=settings.fallback_models,
         )
         context_str = _build_context_str(message.from_user.id)
         try:
             classification = await classifier.classify(user_text, context=context_str)
             if classification.risk_level >= RiskLevel.POSSIBLE_CRISIS:
-                await message.answer(get_crisis_response(classification.risk_level, msg_lang))
+                await message.answer(
+                    get_crisis_response(classification.risk_level, msg_lang)
+                )
                 await client.close()
                 return
         except httpx.HTTPStatusError as exc:
             if exc.response.status_code == 429:
-                logger.warning("stage=classifier status=429 rate_limited; failing closed")
+                logger.warning(
+                    "stage=classifier status=429 rate_limited; failing closed"
+                )
             else:
-                logger.exception("stage=classifier status=%d failing closed", exc.response.status_code)
-            await message.answer(get_text("chat.classifier_unavailable", lang), reply_markup=_back_to_menu_kb(lang))
+                logger.exception(
+                    "stage=classifier status=%d failing closed",
+                    exc.response.status_code,
+                )
+            await message.answer(
+                get_text("chat.classifier_unavailable", lang),
+                reply_markup=_back_to_menu_kb(lang),
+            )
             await client.close()
             return
         except Exception:
             logger.exception("stage=classifier exception; failing closed")
-            await message.answer(get_text("chat.classifier_unavailable", lang), reply_markup=_back_to_menu_kb(lang))
+            await message.answer(
+                get_text("chat.classifier_unavailable", lang),
+                reply_markup=_back_to_menu_kb(lang),
+            )
             await client.close()
             return
 
@@ -182,7 +205,7 @@ async def handle_message(message: types.Message) -> None:
     typing_task = asyncio.create_task(_keep_typing(message))
     try:
         result = None
-        for model in ([settings.default_model] + settings.fallback_models):
+        for model in [settings.default_model] + settings.fallback_models:
             if user_mode == MODE_FRIENDLY_CHAT:
                 agent = FriendlyConversationAgent(client, model=model)
             elif user_mode == MODE_ANXIETY_SUPPORT:
@@ -196,21 +219,33 @@ async def handle_message(message: types.Message) -> None:
             except httpx.HTTPStatusError as exc:
                 logger.warning(
                     "stage=support_generation model=%s status=%d; trying next",
-                    model, exc.response.status_code,
+                    model,
+                    exc.response.status_code,
                 )
             except Exception:
-                logger.exception("stage=support_generation model=%s status=exception", model)
+                logger.exception(
+                    "stage=support_generation model=%s status=exception", model
+                )
                 break
         if result is None:
-            await message.answer(get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang))
+            await message.answer(
+                get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang)
+            )
         elif not result.is_safe:
-            logger.warning("stage=output_validation blocked reason=%s", result.block_reason)
-            await message.answer(get_text("chat.output_blocked", lang), reply_markup=_back_to_menu_kb(lang))
+            logger.warning(
+                "stage=output_validation blocked reason=%s", result.block_reason
+            )
+            await message.answer(
+                get_text("chat.output_blocked", lang),
+                reply_markup=_back_to_menu_kb(lang),
+            )
         else:
             _record_exchange(message.from_user.id, user_text, result.content)
             await message.answer(result.content, reply_markup=_back_to_menu_kb(lang))
     except Exception:
-        await message.answer(get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang))
+        await message.answer(
+            get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang)
+        )
     finally:
         typing_task.cancel()
         await client.close()

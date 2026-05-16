@@ -45,8 +45,7 @@ class ModelSelector:
         models = await self.client.list_models()
         # Filter free models
         free_models = [
-            m for m in models
-            if m.pricing_prompt == "0" and m.pricing_completion == "0"
+            m for m in models if m.pricing_prompt == "0" and m.pricing_completion == "0"
         ]
         self._cache = free_models
         self._cache_time = now
@@ -100,7 +99,9 @@ class ModelSelector:
 
             # Log selection
             top = scored[0]
-            print(f"Selected model: {top.model.id} (score: {top.score}, reasons: {top.reasons})")
+            print(
+                f"Selected model: {top.model.id} (score: {top.score}, reasons: {top.reasons})"
+            )
 
             return top.model.id
         except Exception:

@@ -11,7 +11,9 @@ class RiskTier(IntEnum):
     TIER_1 = 1  # emotional distress, no safety concern
     TIER_2 = 2  # elevated distress: hopelessness, isolation, severe overwhelm
     TIER_3 = 3  # possible self-harm or danger (handled upstream by crisis detector)
-    TIER_4 = 4  # imminent danger — plan, means, inability to stay safe (crisis detector)
+    TIER_4 = (
+        4  # imminent danger — plan, means, inability to stay safe (crisis detector)
+    )
 
 
 class IntakeResult(BaseModel):

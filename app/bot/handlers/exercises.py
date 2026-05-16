@@ -10,10 +10,12 @@ router = Router()
 def _back_keyboard(lang: str) -> types.InlineKeyboardMarkup:
     return types.InlineKeyboardMarkup(
         inline_keyboard=[
-            [types.InlineKeyboardButton(
-                text=get_text("menu.back_to_menu", lang),
-                callback_data="back_to_menu",
-            )]
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.back_to_menu", lang),
+                    callback_data="back_to_menu",
+                )
+            ]
         ]
     )
 
@@ -23,22 +25,30 @@ async def on_exercises_menu(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
     keyboard = types.InlineKeyboardMarkup(
         inline_keyboard=[
-            [types.InlineKeyboardButton(
-                text=get_text("exercises.buttons.breathing", lang),
-                callback_data="ex_breathing",
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("exercises.buttons.cbt", lang),
-                callback_data="ex_cbt",
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("exercises.buttons.mindfulness", lang),
-                callback_data="ex_mindfulness",
-            )],
-            [types.InlineKeyboardButton(
-                text=get_text("menu.back_to_menu", lang),
-                callback_data="back_to_menu",
-            )],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("exercises.buttons.breathing", lang),
+                    callback_data="ex_breathing",
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("exercises.buttons.cbt", lang),
+                    callback_data="ex_cbt",
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("exercises.buttons.mindfulness", lang),
+                    callback_data="ex_mindfulness",
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text=get_text("menu.back_to_menu", lang),
+                    callback_data="back_to_menu",
+                )
+            ],
         ]
     )
     await callback.message.edit_text(
