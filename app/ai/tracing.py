@@ -1,4 +1,4 @@
-"""Optional Langfuse tracing for LLM calls.
+"""Optional Langfuse tracing for LLM calls (compatible with langfuse>=3.0).
 
 Activated only when LANGFUSE_PUBLIC_KEY + LANGFUSE_SECRET_KEY are set.
 By default, message content is NOT sent to Langfuse (LANGFUSE_LOG_CONTENT=false).
@@ -56,18 +56,20 @@ def trace_generation(
     if client is None:
         return
     try:
-        client.generation(
+        with client.start_as_current_observation(
             name=name,
+            as_type="generation",
             model=model,
             input=input_messages if log_content else None,
             output=output if log_content else None,
-            usage={
+            usage_details={
                 "input": prompt_tokens,
                 "output": completion_tokens,
-                "unit": "TOKENS",
             },
             metadata={"latency_ms": latency_ms},
             level=level,
-        )
+            end_on_exit=True,
+        ):
+            pass
     except Exception:
         logger.exception("stage=langfuse status=trace_failed")
