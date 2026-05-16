@@ -29,11 +29,14 @@
   },
   "mood": {
     "question": "📊 Comment te sens-tu maintenant ?",
-    "saved": "✅ Enregistré : {mood}\n\nMerci pour la note ! Le suivi de l'humeur aide à repérer les patterns.\n\nVeux-tu ajouter une note sur ce qui influence ton état ?",
-    "add_note_prompt": "Tu peux ajouter une courte note sur ce qui a influencé ton humeur aujourd'hui.",
-    "note_saved": "Ta note a été enregistrée.",
+    "saved": "✅ Enregistré : {mood}",
+    "add_note_prompt": "Tape ta note ci-dessous. Elle sera ajoutée à ton entrée d'humeur.",
+    "note_saved": "✅ Note enregistrée.",
     "buttons": {
-      "add_note": "Ajouter une note"
+      "add_note": "📝 Ajouter une note",
+      "history": "📚 Historique",
+      "notes": "🗒 Notes",
+      "trend": "📈 Tendance"
     },
     "levels": {
       "5": "Excellent 😊",
@@ -41,6 +44,37 @@
       "3": "Okay 😐",
       "2": "Pas très bien 😕",
       "1": "Mal 😢"
+    },
+    "summary": {
+      "title": "📊 Journal d'humeur",
+      "week_count_one": "Cette semaine : 1 entrée",
+      "week_count": "Cette semaine : {count} entrées",
+      "trend_label": "Tendance",
+      "trend_improving": "↗ en amélioration",
+      "trend_declining": "↘ en baisse",
+      "trend_stable": "→ stable",
+      "trend_mixed": "↕ variable"
+    },
+    "history": {
+      "title": "📚 Historique d'humeur",
+      "empty": "Aucune entrée. Commence par enregistrer ton humeur.",
+      "header": "Dernières {count} entrées :"
+    },
+    "notes": {
+      "title": "🗒 Tes notes",
+      "empty": "Aucune note. Ajoute une note après avoir enregistré ton humeur.",
+      "header": "Notes récentes :"
+    },
+    "trend": {
+      "title": "📈 Tendance d'humeur",
+      "need_more": "Il faut au moins 3 entrées pour voir la tendance. Tu en as {count} pour l'instant.",
+      "average": "Moyenne : {avg}/5",
+      "high": "Plus haut : {high}/5",
+      "low": "Plus bas : {low}/5",
+      "insight_stable": "Ton humeur a été assez stable.",
+      "insight_improving": "Ton humeur s'améliore.",
+      "insight_declining": "Ton humeur a baissé récemment.",
+      "insight_mixed": "Ton humeur a beaucoup varié."
     }
   },
   "chat": {
@@ -50,6 +84,36 @@
   },
   "safety_plan": {
     "title": "📋 Plan de sécurité",
+    "intro": "C'est un plan personnel auquel tu peux revenir quand les choses deviennent difficiles. Remplis-le étape par étape — pas besoin de tout faire d'un coup.",
+    "sections": {
+      "warning_signs": "Mes signes d'alerte précoces",
+      "coping_self": "Ce que je peux faire seul",
+      "distractions": "Lieux ou activités qui aident",
+      "contacts": "Personnes que je peux contacter",
+      "professionals": "Professionnels et services d'urgence",
+      "environment": "Rendre mon environnement plus sûr"
+    },
+    "section_prompts": {
+      "warning_signs": "Quels sont tes signes précoces que les choses deviennent difficiles ?\n\n(ex. : isolement, insomnie, sentiment d'engourdissement)",
+      "coping_self": "Que peux-tu faire seul dans les 10–15 premières minutes ?\n\n(ex. : marcher, écouter de la musique, respirer lentement)",
+      "distractions": "Quels lieux ou activités t'aident à te sentir plus ancré ?\n\n(ex. : un café préféré, un parc, regarder une série)",
+      "contacts": "Qui peux-tu contacter pour du soutien ? Prénom et comment le joindre.",
+      "professionals": "Quels professionnels ou services peux-tu appeler ?\n\n(ex. : thérapeute, ligne de crise, médecin)",
+      "environment": "Que peux-tu faire pour rendre ton environnement plus sûr ?\n\n(ex. : changer de pièce, demander à quelqu'un de rester)"
+    },
+    "add_item_prompt": "Tape ton point et envoie. Tu peux en ajouter d'autres plus tard.",
+    "item_saved": "✅ Enregistré.",
+    "section_header": "Points enregistrés :",
+    "section_empty_items": "Rien d'enregistré pour l'instant.",
+    "empty_section": "○ Pas encore rempli",
+    "full_plan_title": "📖 Ton plan de sécurité",
+    "full_plan_empty": "Ton plan est vide. Appuie sur une section pour commencer.",
+    "not_filled": "Pas encore rempli",
+    "buttons": {
+      "add_item": "➕ Ajouter un point",
+      "view_full": "📖 Voir le plan complet",
+      "back_to_plan": "🔙 Retour au plan de sécurité"
+    },
     "items": [
       "1. Mes signes d'alerte précoces : _____________",
       "2. Ce que je peux faire moi-même dans les 10 premières minutes : _____________",

@@ -89,7 +89,7 @@ async def test_add_note_callback_sets_pending_state() -> None:
 
 @pytest.mark.asyncio
 async def test_chat_handler_captures_mood_note() -> None:
-    """M-4: when user is awaiting a note, handle_message saves it and skips LLM."""
+    """M-4: when user is awaiting a note, handle_message saves it, shows confirmation + summary."""
     import app.bot.handlers.mood as mood_module
     from app.bot.handlers.chat import handle_message
 
@@ -109,11 +109,13 @@ async def test_chat_handler_captures_mood_note() -> None:
     msg.bot.send_chat_action = AsyncMock()
 
     mock_save_note = AsyncMock()
+    mock_summary = AsyncMock()
 
     with (
         patch("app.bot.handlers.chat.deterministic_crisis_check", return_value=(0, None)),
         patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
         patch("app.bot.handlers.chat.save_mood_note", mock_save_note),
+        patch("app.bot.handlers.chat.send_mood_summary", mock_summary),
         patch("app.bot.handlers.chat.OpenRouterClient") as mock_client_cls,
     ):
         await handle_message(msg)
@@ -121,4 +123,5 @@ async def test_chat_handler_captures_mood_note() -> None:
     mock_save_note.assert_called_once_with(user_id, "Felt calm after morning walk")
     assert not mood_module.is_awaiting_note(user_id)
     mock_client_cls.assert_not_called()  # LLM must not be invoked
-    msg.answer.assert_called_once()
+    msg.answer.assert_called_once()  # note_saved confirmation
+    mock_summary.assert_called_once_with(msg, user_id, "en")  # summary card sent after

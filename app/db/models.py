@@ -51,6 +51,7 @@ class User(Base):
     mood_entries: Mapped[list["MoodEntry"]] = relationship(back_populates="user")
     messages: Mapped[list["Message"]] = relationship(back_populates="user")
     safety_events: Mapped[list["SafetyEvent"]] = relationship(back_populates="user")
+    safety_plan: Mapped[Optional["SafetyPlan"]] = relationship(back_populates="user")
 
 
 class MoodEntry(Base):
@@ -106,6 +107,37 @@ class SafetyEvent(Base):
     )
 
     user: Mapped[Optional["User"]] = relationship(back_populates="safety_events")
+
+
+class SafetyPlan(Base):
+    __tablename__ = "safety_plans"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), index=True, unique=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    user: Mapped["User"] = relationship(back_populates="safety_plan")
+    items: Mapped[list["SafetyPlanItem"]] = relationship(
+        back_populates="plan", cascade="all, delete-orphan"
+    )
+
+
+class SafetyPlanItem(Base):
+    __tablename__ = "safety_plan_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    plan_id: Mapped[int] = mapped_column(ForeignKey("safety_plans.id"), index=True)
+    section: Mapped[str] = mapped_column(String(64))
+    content: Mapped[str] = mapped_column(Text)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    plan: Mapped["SafetyPlan"] = relationship(back_populates="items")
 
 
 class Feedback(Base):

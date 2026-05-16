@@ -29,11 +29,14 @@
   },
   "mood": {
     "question": "📊 Wie fühlst du dich gerade?",
-    "saved": "✅ Gespeichert: {mood}\n\nDanke für den Eintrag! Die Stimmungsverfolgung hilft, Muster zu erkennen.\n\nMöchtest du eine Notiz hinzufügen, was deinen Zustand beeinflusst?",
-    "add_note_prompt": "Du kannst eine kurze Notiz dazu hinzufügen, was deine Stimmung heute beeinflusst hat.",
-    "note_saved": "Deine Notiz wurde gespeichert.",
+    "saved": "✅ Gespeichert: {mood}",
+    "add_note_prompt": "Gib unten deine Notiz ein. Sie wird zu deinem Stimmungseintrag hinzugefügt.",
+    "note_saved": "✅ Notiz gespeichert.",
     "buttons": {
-      "add_note": "Notiz hinzufügen"
+      "add_note": "📝 Notiz hinzufügen",
+      "history": "📚 Verlauf",
+      "notes": "🗒 Notizen",
+      "trend": "📈 Trend"
     },
     "levels": {
       "5": "Großartig 😊",
@@ -41,6 +44,37 @@
       "3": "Okay 😐",
       "2": "Nicht so gut 😕",
       "1": "Schlecht 😢"
+    },
+    "summary": {
+      "title": "📊 Stimmungstagebuch",
+      "week_count_one": "Diese Woche: 1 Eintrag",
+      "week_count": "Diese Woche: {count} Einträge",
+      "trend_label": "Trend",
+      "trend_improving": "↗ besser werdend",
+      "trend_declining": "↘ sinkend",
+      "trend_stable": "→ stabil",
+      "trend_mixed": "↕ wechselhaft"
+    },
+    "history": {
+      "title": "📚 Stimmungsverlauf",
+      "empty": "Noch keine Einträge. Beginne damit, deine Stimmung aufzuzeichnen.",
+      "header": "Letzte {count} Einträge:"
+    },
+    "notes": {
+      "title": "🗒 Deine Notizen",
+      "empty": "Noch keine Notizen. Füge nach dem Aufzeichnen deiner Stimmung eine Notiz hinzu.",
+      "header": "Letzte Notizen:"
+    },
+    "trend": {
+      "title": "📈 Stimmungstrend",
+      "need_more": "Mindestens 3 Einträge für den Trend. Du hast bisher {count}.",
+      "average": "Durchschnitt: {avg}/5",
+      "high": "Höchster: {high}/5",
+      "low": "Niedrigster: {low}/5",
+      "insight_stable": "Deine Stimmung war ziemlich stabil.",
+      "insight_improving": "Deine Stimmung verbessert sich.",
+      "insight_declining": "Deine Stimmung ist zuletzt gesunken.",
+      "insight_mixed": "Deine Stimmung hat stark geschwankt."
     }
   },
   "chat": {
@@ -50,6 +84,36 @@
   },
   "safety_plan": {
     "title": "📋 Sicherheitsplan",
+    "intro": "Das ist ein persönlicher Plan, zu dem du zurückkehren kannst, wenn es schwer oder überwältigend wird. Fülle ihn Schritt für Schritt aus — nicht alles auf einmal.",
+    "sections": {
+      "warning_signs": "Meine frühen Warnzeichen",
+      "coping_self": "Was ich selbst tun kann",
+      "distractions": "Orte oder Aktivitäten die helfen",
+      "contacts": "Menschen, die ich kontaktieren kann",
+      "professionals": "Fachleute und Notfalldienste",
+      "environment": "Meine Umgebung sicherer machen"
+    },
+    "section_prompts": {
+      "warning_signs": "Was sind deine frühen Zeichen, dass es schwieriger oder unsicher wird?\n\n(z.B. Rückzug, Schlafprobleme, Taubheit)",
+      "coping_self": "Was kannst du in den ersten 10–15 Minuten selbst tun?\n\n(z.B. spazieren gehen, Musik hören, langsames Atmen)",
+      "distractions": "Welche Orte oder Aktivitäten helfen dir, geerdet zu bleiben?\n\n(z.B. ein Lieblingsort, ein Park, eine bestimmte Serie)",
+      "contacts": "An wen kannst du dich wenden? Name und Kontaktmöglichkeit.",
+      "professionals": "Welche Fachleute oder Dienste kannst du kontaktieren?\n\n(z.B. Therapeut, Krisentelefon, Hausarzt)",
+      "environment": "Was kannst du tun, um deine Umgebung sicherer zu machen?\n\n(z.B. in ein anderes Zimmer gehen, jemanden bitten dabei zu bleiben)"
+    },
+    "add_item_prompt": "Gib deinen Punkt ein und sende. Du kannst später weitere hinzufügen.",
+    "item_saved": "✅ Gespeichert.",
+    "section_header": "Gespeicherte Punkte:",
+    "section_empty_items": "Noch nichts gespeichert.",
+    "empty_section": "○ Noch nicht ausgefüllt",
+    "full_plan_title": "📖 Dein Sicherheitsplan",
+    "full_plan_empty": "Dein Sicherheitsplan ist leer. Tippe auf einen Bereich, um zu beginnen.",
+    "not_filled": "Noch nicht ausgefüllt",
+    "buttons": {
+      "add_item": "➕ Punkt hinzufügen",
+      "view_full": "📖 Vollständigen Plan ansehen",
+      "back_to_plan": "🔙 Zurück zum Sicherheitsplan"
+    },
     "items": [
       "1. Meine frühen Warnzeichen: _____________",
       "2. Was ich selbst in den ersten 10 Minuten tun kann: _____________",

@@ -66,9 +66,10 @@ async def test_delete_user_data_deletes_rows_and_commits() -> None:
         result = await delete_user_data(42)
 
     assert result == DeleteUserDataResult.DELETED
-    # bulk deletes: MoodEntry, Message, SafetyEvent update — each is a session.execute call
-    # plus the initial SELECT: 4 total execute calls
-    assert session.execute.call_count == 4
+    # SELECT user, DELETE mood_entries, DELETE messages,
+    # SELECT safety_plan, DELETE safety_plan_items, DELETE safety_plans,
+    # UPDATE safety_events — 7 execute calls total
+    assert session.execute.call_count == 7
     session.delete.assert_called_once_with(fake_user)
     session.commit.assert_called_once()
 
@@ -117,7 +118,7 @@ async def test_on_delete_confirmed_shows_not_found_text() -> None:
 
 @pytest.mark.asyncio
 async def test_delete_targets_correct_tables() -> None:
-    """D-6: deletes target mood_entries and messages; SafetyEvent UPDATE sets user_id=None."""
+    """D-6: deletes mood_entries, messages, safety_plan_items, safety_plans; UPDATE nullifies safety_events."""
     from app.services.user_service import delete_user_data
 
     fake_user = MagicMock()
@@ -127,14 +128,16 @@ async def test_delete_targets_correct_tables() -> None:
     with patch("app.services.user_service.AsyncSessionLocal", _session_factory(session)):
         await delete_user_data(42)
 
-    # Extract statement objects from each execute call (skip the initial SELECT at index 0)
+    from sqlalchemy.sql.dml import Delete, Update
+
     stmts = [call.args[0] for call in session.execute.call_args_list]
-    assert len(stmts) == 4
+    assert len(stmts) == 7
 
-    bulk_delete_tables = {stmts[1].table.name, stmts[2].table.name}
-    assert bulk_delete_tables == {"mood_entries", "messages"}
+    delete_tables = {s.table.name for s in stmts if isinstance(s, Delete)}
+    update_tables = {s.table.name for s in stmts if isinstance(s, Update)}
 
-    assert stmts[3].table.name == "safety_events"
+    assert delete_tables == {"mood_entries", "messages", "safety_plan_items", "safety_plans"}
+    assert update_tables == {"safety_events"}
 
 
 # ── D-5: handler shows error text and does not claim success on DB failure ────

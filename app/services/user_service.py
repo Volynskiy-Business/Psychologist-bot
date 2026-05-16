@@ -1,11 +1,11 @@
 import enum
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from sqlalchemy import delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Message, MoodEntry, RiskLevel, SafetyEvent, User
+from app.db.models import Message, MoodEntry, RiskLevel, SafetyEvent, SafetyPlan, SafetyPlanItem, User
 from app.db.session import AsyncSessionLocal
 
 
@@ -110,6 +110,53 @@ async def save_mood_note(telegram_id: int, note: str) -> None:
             await session.commit()
 
 
+async def get_mood_history(telegram_id: int, limit: int = 7) -> list[MoodEntry]:
+    """Return the most recent mood entries (descending order) for a user."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(User).where(User.telegram_id == telegram_id)
+        )
+        user = result.scalar_one_or_none()
+        if user is None:
+            return []
+        result = await session.execute(
+            select(MoodEntry)
+            .where(MoodEntry.user_id == user.id)
+            .order_by(MoodEntry.created_at.desc())
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
+
+async def get_mood_trend_data(telegram_id: int, days: int = 7) -> dict:
+    """Return aggregated mood trend data for recent entries."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(User).where(User.telegram_id == telegram_id)
+        )
+        user = result.scalar_one_or_none()
+        if user is None:
+            return {"count": 0, "entries": []}
+        cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
+        result = await session.execute(
+            select(MoodEntry)
+            .where(MoodEntry.user_id == user.id)
+            .where(MoodEntry.created_at >= cutoff)
+            .order_by(MoodEntry.created_at.desc())
+        )
+        entries = list(result.scalars().all())
+        if not entries:
+            return {"count": 0, "entries": []}
+        scores = [e.mood_score for e in entries]
+        return {
+            "count": len(entries),
+            "entries": entries,
+            "avg": round(sum(scores) / len(scores), 1),
+            "high": max(scores),
+            "low": min(scores),
+        }
+
+
 async def record_safety_event(
     *,
     telegram_user_id: int,
@@ -144,6 +191,19 @@ async def delete_user_data(telegram_user_id: int) -> DeleteUserDataResult:
 
         await session.execute(delete(MoodEntry).where(MoodEntry.user_id == user_id))
         await session.execute(delete(Message).where(Message.user_id == user_id))
+
+        # Delete safety plan and all items (cascade handles items).
+        result = await session.execute(
+            select(SafetyPlan).where(SafetyPlan.user_id == user_id)
+        )
+        plan = result.scalar_one_or_none()
+        if plan is not None:
+            await session.execute(
+                delete(SafetyPlanItem).where(SafetyPlanItem.plan_id == plan.id)
+            )
+            await session.execute(
+                delete(SafetyPlan).where(SafetyPlan.id == plan.id)
+            )
 
         # Nullify both FK and direct Telegram identifier on retained audit rows.
         # Covers post-consent rows (user_id set via FK) and pre-consent rows

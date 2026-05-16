@@ -52,11 +52,14 @@
   },
   "mood": {
     "question": "📊 ¿Cómo te sientes ahora mismo?",
-    "saved": "✅ Guardado: {mood}\n\n¡Gracias por la nota! Registrar el estado de ánimo ayuda a detectar patrones.\n\n¿Te gustaría añadir una nota sobre lo que está influyendo en tu estado?",
-    "add_note_prompt": "Puedes añadir una breve nota sobre lo que afectó tu estado de ánimo hoy.",
-    "note_saved": "Tu nota se ha guardado.",
+    "saved": "✅ Guardado: {mood}",
+    "add_note_prompt": "Escribe tu nota abajo. Se añadirá a tu entrada de ánimo.",
+    "note_saved": "✅ Nota guardada.",
     "buttons": {
-      "add_note": "Añadir una nota"
+      "add_note": "📝 Añadir nota",
+      "history": "📚 Historial",
+      "notes": "🗒 Notas",
+      "trend": "📈 Tendencia"
     },
     "levels": {
       "5": "Genial 😊",
@@ -64,6 +67,37 @@
       "3": "Regular 😐",
       "2": "No muy bien 😕",
       "1": "Mal 😢"
+    },
+    "summary": {
+      "title": "📊 Diario de ánimo",
+      "week_count_one": "Esta semana: 1 entrada",
+      "week_count": "Esta semana: {count} entradas",
+      "trend_label": "Tendencia",
+      "trend_improving": "↗ mejorando",
+      "trend_declining": "↘ bajando",
+      "trend_stable": "→ estable",
+      "trend_mixed": "↕ variable"
+    },
+    "history": {
+      "title": "📚 Historial de ánimo",
+      "empty": "Sin entradas aún. Empieza registrando tu ánimo.",
+      "header": "Últimas {count} entradas:"
+    },
+    "notes": {
+      "title": "🗒 Tus notas",
+      "empty": "Sin notas aún. Añade una nota después de registrar tu ánimo.",
+      "header": "Notas recientes:"
+    },
+    "trend": {
+      "title": "📈 Tendencia de ánimo",
+      "need_more": "Necesitas al menos 3 entradas para ver la tendencia. Tienes {count} hasta ahora.",
+      "average": "Media: {avg}/5",
+      "high": "Más alto: {high}/5",
+      "low": "Más bajo: {low}/5",
+      "insight_stable": "Tu ánimo ha sido bastante estable.",
+      "insight_improving": "Tu ánimo está mejorando.",
+      "insight_declining": "Tu ánimo ha bajado recientemente.",
+      "insight_mixed": "Tu ánimo ha variado bastante."
     }
   },
   "chat": {
@@ -76,6 +110,36 @@
   },
   "safety_plan": {
     "title": "📋 Plan de seguridad",
+    "intro": "Este es un plan personal al que puedes volver cuando las cosas se pongan difíciles. Rellénalo paso a paso — no hace falta hacerlo todo de una vez.",
+    "sections": {
+      "warning_signs": "Mis señales de alerta tempranas",
+      "coping_self": "Lo que puedo hacer yo solo/a",
+      "distractions": "Lugares o actividades que ayudan",
+      "contacts": "Personas a las que puedo contactar",
+      "professionals": "Profesionales y servicios de emergencia",
+      "environment": "Hacer mi entorno más seguro"
+    },
+    "section_prompts": {
+      "warning_signs": "¿Cuáles son tus señales tempranas de que las cosas se ponen difíciles?\n\n(ej. aislarse, no dormir, sentirse entumecido/a)",
+      "coping_self": "¿Qué puedes hacer tú solo/a en los primeros 10–15 minutos?\n\n(ej. dar un paseo, poner música, respirar despacio)",
+      "distractions": "¿Qué lugares o actividades te ayudan a sentirte más estable?\n\n(ej. una cafetería favorita, un parque, ver una serie)",
+      "contacts": "¿A quién puedes recurrir en busca de apoyo? Nombre y cómo contactarlos.",
+      "professionals": "¿A qué profesionales o servicios puedes llamar?\n\n(ej. terapeuta, línea de crisis, médico)",
+      "environment": "¿Qué puedes hacer para que tu entorno sea más seguro?\n\n(ej. cambiar de habitación, pedir a alguien que se quede contigo)"
+    },
+    "add_item_prompt": "Escribe tu punto y envía. Puedes añadir más después.",
+    "item_saved": "✅ Guardado.",
+    "section_header": "Puntos guardados:",
+    "section_empty_items": "Nada guardado aún.",
+    "empty_section": "○ Sin rellenar",
+    "full_plan_title": "📖 Tu plan de seguridad",
+    "full_plan_empty": "Tu plan está vacío. Toca una sección para empezar.",
+    "not_filled": "Sin rellenar",
+    "buttons": {
+      "add_item": "➕ Añadir punto",
+      "view_full": "📖 Ver plan completo",
+      "back_to_plan": "🔙 Volver al plan de seguridad"
+    },
     "items": [
       "1. Mis señales de alerta tempranas: _____________",
       "2. Lo que puedo hacer por mí mismo/a en los primeros 10 minutos: _____________",

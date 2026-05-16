@@ -6,9 +6,15 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      # Override host-based DATABASE_URL from .env with Docker-network address
+      DATABASE_URL: postgresql+asyncpg://psysupport_user:K9d8r7m6b5L4v3x2Z1c0n9M8@postgres:5432/psysupport
+      REDIS_URL: redis://redis:6379/0
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./data:/app/data
     ports:
@@ -31,6 +37,11 @@ services:
       - "5433:5432"
     volumes:
       - psysupport_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U psysupport_user -d psysupport"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -45,6 +56,8 @@ services:
     image: prom/prometheus:latest
     container_name: psy-support-prometheus
     restart: unless-stopped
+    profiles:
+      - monitoring
     volumes:
       - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -58,6 +71,8 @@ services:
     image: grafana/grafana:latest
     container_name: psy-support-grafana
     restart: unless-stopped
+    profiles:
+      - monitoring
     volumes:
       - grafana_data:/var/lib/grafana
     ports:
@@ -66,7 +81,6 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
 
 volumes:
-  postgres_data:
   psysupport_postgres_data:
   redis_data:
   prometheus_data:

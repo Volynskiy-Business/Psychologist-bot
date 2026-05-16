@@ -29,11 +29,14 @@
   },
   "mood": {
     "question": "📊 Hvordan har du det lige nu?",
-    "saved": "✅ Gemt: {mood}\n\nTak for noten! At følge humøret hjælper med at bemærke mønstre.\n\nVil du tilføje en note om, hvad der påvirker din tilstand?",
-    "add_note_prompt": "Du kan tilføje en kort note om, hvad der påvirkede dit humør i dag.",
-    "note_saved": "Din note er gemt.",
+    "saved": "✅ Gemt: {mood}",
+    "add_note_prompt": "Skriv din note nedenfor. Den vil blive tilføjet til din humørregistrering.",
+    "note_saved": "✅ Note gemt.",
     "buttons": {
-      "add_note": "Tilføj note"
+      "add_note": "📝 Tilføj note",
+      "history": "📚 Historik",
+      "notes": "🗒 Noter",
+      "trend": "📈 Trend"
     },
     "levels": {
       "5": "Fremragende 😊",
@@ -41,6 +44,37 @@
       "3": "Okay 😐",
       "2": "Ikke så godt 😕",
       "1": "Dårligt 😢"
+    },
+    "summary": {
+      "title": "📊 Humørdagbog",
+      "week_count_one": "Denne uge: 1 registrering",
+      "week_count": "Denne uge: {count} registreringer",
+      "trend_label": "Trend",
+      "trend_improving": "↗ forbedring",
+      "trend_declining": "↘ faldende",
+      "trend_stable": "→ stabilt",
+      "trend_mixed": "↕ varierende"
+    },
+    "history": {
+      "title": "📚 Humørhistorik",
+      "empty": "Ingen registreringer endnu. Begynd at registrere dit humør.",
+      "header": "Seneste {count} registreringer:"
+    },
+    "notes": {
+      "title": "🗒 Dine noter",
+      "empty": "Ingen noter endnu. Tilføj en note efter at have registreret dit humør.",
+      "header": "Seneste noter:"
+    },
+    "trend": {
+      "title": "📈 Humørtrend",
+      "need_more": "Du har brug for mindst 3 registreringer for at se trenden. Du har {count} indtil videre.",
+      "average": "Gennemsnit: {avg}/5",
+      "high": "Højest: {high}/5",
+      "low": "Lavest: {low}/5",
+      "insight_stable": "Dit humør har været ret stabilt.",
+      "insight_improving": "Dit humør er forbedret.",
+      "insight_declining": "Dit humør er faldet for nylig.",
+      "insight_mixed": "Dit humør har varieret en del."
     }
   },
   "chat": {
@@ -50,6 +84,36 @@
   },
   "safety_plan": {
     "title": "📋 Sikkerhedsplan",
+    "intro": "Dette er en personlig plan, du kan vende tilbage til, når tingene bliver svære. Udfyld den trin for trin — du behøver ikke gøre det hele på én gang.",
+    "sections": {
+      "warning_signs": "Mine tidlige advarselstegn",
+      "coping_self": "Hvad jeg selv kan gøre",
+      "distractions": "Steder eller aktiviteter der hjælper",
+      "contacts": "Personer jeg kan kontakte",
+      "professionals": "Fagpersoner og nødtjenester",
+      "environment": "Gøre mine omgivelser sikrere"
+    },
+    "section_prompts": {
+      "warning_signs": "Hvad er dine tidlige tegn på, at tingene begynder at blive svære?\n\n(f.eks. trække sig tilbage, ikke sove, føle sig følelsesløs)",
+      "coping_self": "Hvad kan du selv gøre i de første 10–15 minutter?\n\n(f.eks. gå en tur, sætte musik på, trække vejret langsomt)",
+      "distractions": "Hvilke steder eller aktiviteter hjælper dig med at føle dig mere jordforbundet?\n\n(f.eks. en yndlingscafé, en park, se en bestemt serie)",
+      "contacts": "Hvem kan du kontakte for støtte? Navn og kontaktoplysninger.",
+      "professionals": "Hvilke fagpersoner eller tjenester kan du kontakte?\n\n(f.eks. terapeut, kriselinje, læge)",
+      "environment": "Hvad kan du gøre for at gøre dine omgivelser sikrere?\n\n(f.eks. gå til et andet rum, bede nogen om at være i nærheden)"
+    },
+    "add_item_prompt": "Skriv dit punkt og send. Du kan tilføje flere senere.",
+    "item_saved": "✅ Gemt.",
+    "section_header": "Gemte punkter:",
+    "section_empty_items": "Intet gemt endnu.",
+    "empty_section": "○ Ikke udfyldt",
+    "full_plan_title": "📖 Din sikkerhedsplan",
+    "full_plan_empty": "Din sikkerhedsplan er tom. Tryk på en sektion for at begynde.",
+    "not_filled": "Ikke udfyldt",
+    "buttons": {
+      "add_item": "➕ Tilføj punkt",
+      "view_full": "📖 Se hele planen",
+      "back_to_plan": "🔙 Tilbage til sikkerhedsplan"
+    },
     "items": [
       "1. Mine tidlige advarselstegn: _____________",
       "2. Hvad jeg selv kan gøre i de første 10 minutter: _____________",

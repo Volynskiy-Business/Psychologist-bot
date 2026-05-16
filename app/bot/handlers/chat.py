@@ -10,13 +10,23 @@ from aiogram.filters import Command
 
 from app.ai.agents.anxiety_support import AnxietySupportAgent
 from app.ai.agents.friendly_conversation import FriendlyConversationAgent
+from app.ai.agents.sadness_support import SadnessSupportAgent
 from app.ai.openrouter_client import OpenRouterClient
 from app.ai.orchestration.pipeline import SupportPipeline
-from app.ai.routing.intake import detect_language
+from app.ai.routing.intake import classify_intake, detect_language
 from app.bot.handlers.i18n import get_text, get_user_language
-from app.bot.user_state import MODE_ANXIETY_SUPPORT, MODE_FRIENDLY_CHAT, get_mode
-from app.bot.handlers.mood import consume_note_waiter, is_awaiting_note
+from app.bot.user_state import (
+    MODE_ANXIETY_SUPPORT,
+    MODE_FRIENDLY_CHAT,
+    MODE_SADNESS_SUPPORT,
+    clear_safety_section,
+    get_mode,
+    get_safety_section,
+)
+from app.bot.handlers.mood import consume_note_waiter, is_awaiting_note, send_mood_summary
+from app.bot.handlers.safety_plan import send_section_view
 from app.config import settings
+from app.services.safety_plan_service import add_item as add_safety_plan_item
 from app.services.user_service import has_consent, record_safety_event, save_mood_note
 from app.db.models import RiskLevel
 from app.safety.crisis_detector import deterministic_crisis_check
@@ -95,6 +105,10 @@ async def handle_message(message: types.Message) -> None:
     risk_level, pattern = deterministic_crisis_check(user_text)
 
     if risk_level >= RiskLevel.POSSIBLE_CRISIS:
+        # Clear any pending tool states so the crisis phrase is not later saved as
+        # a mood note or safety plan item.
+        consume_note_waiter(message.from_user.id)
+        clear_safety_section(message.from_user.id)
         try:
             await record_safety_event(
                 telegram_user_id=message.from_user.id,
@@ -108,6 +122,8 @@ async def handle_message(message: types.Message) -> None:
 
     # Step 1a: Passive-risk phrases — deterministic Tier 2 response, no LLM required
     if risk_level == RiskLevel.ELEVATED_DISTRESS:
+        consume_note_waiter(message.from_user.id)
+        clear_safety_section(message.from_user.id)
         try:
             await record_safety_event(
                 telegram_user_id=message.from_user.id,
@@ -143,19 +159,19 @@ async def handle_message(message: types.Message) -> None:
             await save_mood_note(message.from_user.id, user_text)
         except Exception:
             logger.exception("stage=mood_note Failed to save note")
-        await message.answer(
-            get_text("mood.note_saved", lang),
-            reply_markup=types.InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [
-                        types.InlineKeyboardButton(
-                            text=get_text("menu.back_to_menu", lang),
-                            callback_data="back_to_menu",
-                        )
-                    ]
-                ]
-            ),
-        )
+        await message.answer(get_text("mood.note_saved", lang))
+        await send_mood_summary(message, message.from_user.id, lang)
+        return
+
+    # Step 1d: Safety plan item interception — save text to active section, skip LLM
+    section = get_safety_section(message.from_user.id)
+    if section:
+        clear_safety_section(message.from_user.id)
+        try:
+            await add_safety_plan_item(message.from_user.id, section, user_text)
+        except Exception:
+            logger.exception("stage=safety_plan Failed to save item section=%s", section)
+        await send_section_view(message, message.from_user.id, section, lang)
         return
 
     # Step 2: LLM safety classification — only when CLASSIFIER_MODEL is explicitly configured
@@ -200,20 +216,29 @@ async def handle_message(message: types.Message) -> None:
             await client.close()
             return
 
-    # Step 3: Route to FriendlyConversationAgent or SupportPipeline based on user mode
+    # Step 3: Route to the appropriate agent based on user mode.
+    # If no explicit mode is set, auto-detect sadness signals (deterministic, no LLM).
     user_mode = get_mode(message.from_user.id)
+    if not user_mode:
+        quick = classify_intake(user_text, msg_lang)
+        if quick.detected_emotion in ("sadness", "grief"):
+            user_mode = MODE_SADNESS_SUPPORT
+
     history = _get_history(message.from_user.id)
     typing_task = asyncio.create_task(_keep_typing(message))
     try:
         result = None
         for model in [settings.default_model] + settings.fallback_models:
             agent: Union[
-                FriendlyConversationAgent, AnxietySupportAgent, SupportPipeline
+                FriendlyConversationAgent, AnxietySupportAgent,
+                SadnessSupportAgent, SupportPipeline
             ]
             if user_mode == MODE_FRIENDLY_CHAT:
                 agent = FriendlyConversationAgent(client, model=model)
             elif user_mode == MODE_ANXIETY_SUPPORT:
                 agent = AnxietySupportAgent(client, model=model)
+            elif user_mode == MODE_SADNESS_SUPPORT:
+                agent = SadnessSupportAgent(client, model=model)
             else:
                 agent = SupportPipeline(client, model=model)
             try:

@@ -6,7 +6,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
 
-from app.bot.handlers import chat, exercises, mood, start
+from app.bot.handlers import chat, exercises, mood, safety_plan, start
 from app.config import settings
 
 logging.basicConfig(
@@ -28,6 +28,7 @@ def create_dispatcher() -> Dispatcher:
     dp.include_router(start.router)
     dp.include_router(exercises.router)
     dp.include_router(mood.router)
+    dp.include_router(safety_plan.router)
     dp.include_router(chat.router)
     return dp
 

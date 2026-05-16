@@ -5,11 +5,13 @@ import logging
 from aiogram import Router, types
 from aiogram.filters import Command
 
-from app.bot.handlers.i18n import get_text, get_user_language, load_translation
+from app.bot.handlers.i18n import get_text, get_user_language
 from app.bot.user_state import (
     MODE_ANXIETY_SUPPORT,
     MODE_FRIENDLY_CHAT,
+    MODE_SADNESS_SUPPORT,
     clear_mode,
+    clear_safety_section,
     set_mode,
 )
 from app.services.user_service import (
@@ -201,6 +203,7 @@ async def on_back_to_start(callback: types.CallbackQuery) -> None:
 async def on_back_to_menu(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
     clear_mode(callback.from_user.id)
+    clear_safety_section(callback.from_user.id)
     await callback.message.edit_text(
         get_text("start.thanks", lang),
         reply_markup=main_menu_keyboard(lang),
@@ -236,7 +239,7 @@ async def on_mode_anxiety(callback: types.CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "mode_sad")
 async def on_mode_sad(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
-    clear_mode(callback.from_user.id)
+    set_mode(callback.from_user.id, MODE_SADNESS_SUPPORT)
     await callback.message.edit_text(
         get_text("modes.sad_intro", lang),
         reply_markup=_back_to_menu_keyboard(lang),
@@ -288,28 +291,6 @@ async def on_mode_mood(callback: types.CallbackQuery) -> None:
     await callback.message.edit_text(
         get_text("mood.question", lang),
         reply_markup=keyboard,
-    )
-    await callback.answer()
-
-
-# ── Safety plan ───────────────────────────────────────────────────────────────
-
-
-@router.callback_query(lambda c: c.data == "safety_plan")
-async def on_safety_plan(callback: types.CallbackQuery) -> None:
-    lang = get_user_language(callback.from_user)
-    t = load_translation(lang)
-    items: list[str] = t.get("safety_plan", {}).get("items", [])
-    text = (
-        get_text("safety_plan.title", lang)
-        + "\n\n"
-        + "\n".join(items)
-        + "\n\n"
-        + get_text("safety_plan.start_filling", lang)
-    )
-    await callback.message.edit_text(
-        text,
-        reply_markup=_back_to_menu_keyboard(lang),
     )
     await callback.answer()
 

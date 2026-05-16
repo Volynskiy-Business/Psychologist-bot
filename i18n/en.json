@@ -53,11 +53,14 @@
   },
   "mood": {
     "question": "📊 How are you feeling right now?",
-    "saved": "✅ Saved: {mood}\n\nThanks for the note! Tracking mood helps notice patterns.\n\nWould you like to add a note about what's affecting your state?",
-    "add_note_prompt": "Please type your note below. It will be added to your mood entry.",
-    "note_saved": "✅ Note saved. Take care of yourself! 🌱",
+    "saved": "✅ Saved: {mood}",
+    "add_note_prompt": "Type your note below. It will be added to your mood entry.",
+    "note_saved": "✅ Note saved.",
     "buttons": {
-      "add_note": "📝 Add a note"
+      "add_note": "📝 Add note",
+      "history": "📚 History",
+      "notes": "🗒 Notes",
+      "trend": "📈 Trend"
     },
     "levels": {
       "5": "Great 😊",
@@ -65,6 +68,37 @@
       "3": "Okay 😐",
       "2": "Not great 😕",
       "1": "Bad 😢"
+    },
+    "summary": {
+      "title": "📊 Mood Journal",
+      "week_count_one": "This week: 1 entry",
+      "week_count": "This week: {count} entries",
+      "trend_label": "Trend",
+      "trend_improving": "↗ improving",
+      "trend_declining": "↘ declining",
+      "trend_stable": "→ stable",
+      "trend_mixed": "↕ mixed"
+    },
+    "history": {
+      "title": "📚 Mood History",
+      "empty": "No entries yet. Start by recording your mood.",
+      "header": "Last {count} entries:"
+    },
+    "notes": {
+      "title": "🗒 Your Notes",
+      "empty": "No notes yet. Add a note after recording your mood.",
+      "header": "Recent notes:"
+    },
+    "trend": {
+      "title": "📈 Mood Trend",
+      "need_more": "Log at least 3 entries to see your trend. You have {count} so far.",
+      "average": "Average: {avg}/5",
+      "high": "Highest: {high}/5",
+      "low": "Lowest: {low}/5",
+      "insight_stable": "Your mood has been fairly stable.",
+      "insight_improving": "Your mood has been improving.",
+      "insight_declining": "Your mood has dipped recently.",
+      "insight_mixed": "Your mood has varied quite a bit."
     }
   },
   "chat": {
@@ -77,6 +111,36 @@
   },
   "safety_plan": {
     "title": "📋 Safety Plan",
+    "intro": "This is a personal plan you can return to anytime when things feel hard or overwhelming. Fill it step by step — no need to do it all at once.",
+    "sections": {
+      "warning_signs": "My early warning signs",
+      "coping_self": "Things I can do by myself",
+      "distractions": "Places or activities that help",
+      "contacts": "People I can contact",
+      "professionals": "Professional or emergency resources",
+      "environment": "Making my environment safer"
+    },
+    "section_prompts": {
+      "warning_signs": "What are your early signs that things are starting to feel unsafe or overwhelming?\n\n(e.g. withdrawing from people, not sleeping, feeling restless or numb)",
+      "coping_self": "What can you do by yourself in the first 10–15 minutes when things feel hard?\n\n(e.g. go for a walk, put on music, slow breathing, make tea)",
+      "distractions": "What places or activities help you feel more grounded?\n\n(e.g. a favourite café, a park, watching a specific show)",
+      "contacts": "Who can you reach out to for support? Include name and how to contact them.",
+      "professionals": "What professionals or services can you contact?\n\n(e.g. your therapist, a crisis line, a GP or hospital)",
+      "environment": "What can you do to make your immediate surroundings feel safer?\n\n(e.g. move to another room, ask someone to stay nearby, remove certain items)"
+    },
+    "add_item_prompt": "Type your item and send. You can add more items later.",
+    "item_saved": "✅ Saved.",
+    "section_header": "Saved items:",
+    "section_empty_items": "Nothing saved yet.",
+    "empty_section": "○ Not filled yet",
+    "full_plan_title": "📖 Your Safety Plan",
+    "full_plan_empty": "Your safety plan is empty. Tap any section to start filling it in.",
+    "not_filled": "Not filled yet",
+    "buttons": {
+      "add_item": "➕ Add item",
+      "view_full": "📖 View full plan",
+      "back_to_plan": "🔙 Back to Safety Plan"
+    },
     "items": [
       "1. My early warning signs: _____________",
       "2. What I can do myself in the first 10 minutes: _____________",
