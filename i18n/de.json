@@ -135,5 +135,10 @@
     "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
     "rate_limit": "Zu viele Nachrichten. Bitte warte einen Moment.",
     "model_unavailable": "KI-Modell ist vorübergehend nicht verfügbar. Bitte versuche es in einer Minute erneut."
+  },
+  "feedback": {
+    "helpful": "👍 Hilfreich",
+    "not_helpful": "👎 Nicht hilfreich",
+    "thanks": "Danke! 🙏"
   }
 }

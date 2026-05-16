@@ -135,5 +135,10 @@
     "generic": "Quelque chose s'est mal passé. Réessaie.",
     "rate_limit": "Trop de messages. Attends un moment.",
     "model_unavailable": "Le modèle IA est temporairement indisponible. Réessaie dans une minute."
+  },
+  "feedback": {
+    "helpful": "👍 Utile",
+    "not_helpful": "👎 Pas utile",
+    "thanks": "Merci ! 🙏"
   }
 }

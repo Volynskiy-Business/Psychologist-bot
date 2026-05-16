@@ -66,10 +66,10 @@ async def test_delete_user_data_deletes_rows_and_commits() -> None:
         result = await delete_user_data(42)
 
     assert result == DeleteUserDataResult.DELETED
-    # SELECT user, DELETE mood_entries, DELETE messages,
+    # SELECT user, DELETE feedback, DELETE mood_entries, DELETE messages,
     # SELECT safety_plan, DELETE safety_plan_items, DELETE safety_plans,
-    # UPDATE safety_events — 7 execute calls total
-    assert session.execute.call_count == 7
+    # UPDATE safety_events — 8 execute calls total
+    assert session.execute.call_count == 8
     session.delete.assert_called_once_with(fake_user)
     session.commit.assert_called_once()
 
@@ -131,12 +131,12 @@ async def test_delete_targets_correct_tables() -> None:
     from sqlalchemy.sql.dml import Delete, Update
 
     stmts = [call.args[0] for call in session.execute.call_args_list]
-    assert len(stmts) == 7
+    assert len(stmts) == 8
 
     delete_tables = {s.table.name for s in stmts if isinstance(s, Delete)}
     update_tables = {s.table.name for s in stmts if isinstance(s, Update)}
 
-    assert delete_tables == {"mood_entries", "messages", "safety_plan_items", "safety_plans"}
+    assert delete_tables == {"feedback", "mood_entries", "messages", "safety_plan_items", "safety_plans"}
     assert update_tables == {"safety_events"}
 
 

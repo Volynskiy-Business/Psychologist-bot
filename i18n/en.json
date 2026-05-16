@@ -159,6 +159,11 @@
     "deleted": "✅ All your data has been deleted.",
     "not_found": "No stored data was found. Your account may have already been removed."
   },
+  "feedback": {
+    "helpful": "👍 Helpful",
+    "not_helpful": "👎 Not helpful",
+    "thanks": "Thanks! 🙏"
+  },
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "rate_limit": "Too many messages. Please wait a moment.",

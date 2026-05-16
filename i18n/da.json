@@ -135,5 +135,10 @@
     "generic": "Noget gik galt. Prøv igen.",
     "rate_limit": "For mange beskeder. Vent venligst et øjeblik.",
     "model_unavailable": "AI-modellen er midlertidigt utilgængelig. Prøv igen om et minut."
+  },
+  "feedback": {
+    "helpful": "👍 Nyttigt",
+    "not_helpful": "👎 Ikke nyttigt",
+    "thanks": "Tak! 🙏"
   }
 }

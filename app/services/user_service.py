@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy import delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Message, MoodEntry, RiskLevel, SafetyEvent, SafetyPlan, SafetyPlanItem, User
+from app.db.models import Feedback, Message, MoodEntry, RiskLevel, SafetyEvent, SafetyPlan, SafetyPlanItem, User
 from app.db.session import AsyncSessionLocal
 
 
@@ -189,6 +189,7 @@ async def delete_user_data(telegram_user_id: int) -> DeleteUserDataResult:
 
         user_id = user.id
 
+        await session.execute(delete(Feedback).where(Feedback.user_id == user_id))
         await session.execute(delete(MoodEntry).where(MoodEntry.user_id == user_id))
         await session.execute(delete(Message).where(Message.user_id == user_id))
 

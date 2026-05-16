@@ -23,6 +23,7 @@ from app.bot.user_state import (
     get_mode,
     get_safety_section,
 )
+from app.bot.handlers.feedback import feedback_keyboard
 from app.bot.handlers.mood import consume_note_waiter, is_awaiting_note, send_mood_summary
 from app.bot.handlers.safety_plan import send_section_view
 from app.config import settings
@@ -270,7 +271,7 @@ async def handle_message(message: types.Message) -> None:
             )
         else:
             _record_exchange(message.from_user.id, user_text, result.content)
-            await message.answer(result.content, reply_markup=_back_to_menu_kb(lang))
+            await message.answer(result.content, reply_markup=feedback_keyboard(lang))
     except Exception:
         await message.answer(
             get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang)

@@ -135,5 +135,10 @@
     "generic": "Algo correu mal. Tenta novamente.",
     "rate_limit": "Demasiadas mensagens. Por favor, espera um momento.",
     "model_unavailable": "O modelo de IA está temporariamente indisponível. Tenta novamente dentro de um minuto."
+  },
+  "feedback": {
+    "helpful": "👍 Útil",
+    "not_helpful": "👎 Não foi útil",
+    "thanks": "Obrigado! 🙏"
   }
 }
