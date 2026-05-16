@@ -7,6 +7,7 @@ from typing import Any, Optional
 import httpx
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
+from app.ai import tracing
 from app.config import settings
 
 
@@ -84,13 +85,24 @@ class OpenRouterClient:
         choice = data["choices"][0]
         usage = data.get("usage", {})
 
-        return OpenRouterResponse(
+        resp = OpenRouterResponse(
             content=choice["message"]["content"],
             model=data.get("model", model or self.default_model),
             prompt_tokens=usage.get("prompt_tokens", 0),
             completion_tokens=usage.get("completion_tokens", 0),
             latency_ms=latency_ms,
         )
+        tracing.trace_generation(
+            name="chat_completion",
+            model=resp.model,
+            prompt_tokens=resp.prompt_tokens,
+            completion_tokens=resp.completion_tokens,
+            latency_ms=resp.latency_ms,
+            log_content=settings.langfuse_log_content,
+            input_messages=messages,
+            output=resp.content,
+        )
+        return resp
 
     async def list_models(self) -> list[OpenRouterModel]:
         response = await self.client.get(f"{self.base_url}/models")

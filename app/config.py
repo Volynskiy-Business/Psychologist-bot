@@ -1,5 +1,7 @@
 """Application configuration using Pydantic Settings."""
 
+from typing import Optional
+
 from pydantic import Field, RedisDsn, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -48,6 +50,12 @@ class Settings(BaseSettings):
     app_env: str = Field("development", alias="APP_ENV")
     log_level: str = Field("INFO", alias="LOG_LEVEL")
     allow_free_models: bool = Field(False, alias="ALLOW_FREE_MODELS")
+
+    # Langfuse (optional LLM observability — disabled if keys not set)
+    langfuse_public_key: str = Field("", alias="LANGFUSE_PUBLIC_KEY")
+    langfuse_secret_key: Optional[SecretStr] = Field(None, alias="LANGFUSE_SECRET_KEY")
+    langfuse_host: str = Field("https://cloud.langfuse.com", alias="LANGFUSE_HOST")
+    langfuse_log_content: bool = Field(False, alias="LANGFUSE_LOG_CONTENT")
 
     @property
     def is_production(self) -> bool:
