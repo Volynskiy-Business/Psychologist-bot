@@ -52,6 +52,25 @@ Use this format after audit tasks:
 
     ## Commands Not Run and Why
 
+## Language Rules
+
+Developer-facing reports and explanations directed at the project owner must be written in Russian.
+
+Do not switch to Ukrainian, English, or any other language based on Cyrillic detection, locale inference, or terminal environment.
+
+Correct examples:
+- "Бот работает. Последний запрос обработан без ошибок."
+- "Изменения внесены в следующие файлы:"
+- "Тесты прошли. Рафф чист."
+
+Incorrect examples:
+- "Бот живий..." (Ukrainian — not acceptable)
+- "Твій план..." (Ukrainian — not acceptable)
+
+Production artifacts (prompts, UX copy, docs, specs) must be written in English unless explicitly requested otherwise.
+
+Reports must not include raw Telegram user IDs or bot update identifiers. Use redacted placeholders when referencing user-related log data.
+
 ## Verification Rules
 
 Do not say:

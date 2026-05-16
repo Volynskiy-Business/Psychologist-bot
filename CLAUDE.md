@@ -10,6 +10,21 @@ It is not a doctor, licensed therapist, crisis hotline, medical device, diagnost
 
 Never introduce code, copy, prompts, flows, or documentation that implies diagnosis, treatment authority, emergency response capability, or replacement of professional human help.
 
+## Language Policy
+
+Communication with the project owner must always be in Russian unless the owner explicitly requests another language. Do not switch to Ukrainian, English, or any other language based on locale, Cyrillic detection, terminal environment, or prior model assumptions.
+
+Production artifacts for PsySupport AI (README, prompts, UX copy, product specs, docs, implementation briefs, structured developer tasks) must be written in professional English unless explicitly requested otherwise.
+
+Telegram bot runtime responses must follow the language of the user's current message.
+
+Summary of language rules:
+
+1. Owner / founder communication: Russian only.
+2. Production project artifacts (prompts, docs, UX copy): English by default.
+3. Telegram bot responses: language of the current user message.
+4. Logs / code / identifiers: English.
+
 ## Core Agent Rules
 
 Work as a careful senior engineer.
