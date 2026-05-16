@@ -633,6 +633,139 @@ scenarios:
     contraindications: []
     escalation_rules:
       - "If financial crisis involves safety risk or suicidal ideation → escalate to Tier 3"
+    knowledge_snippets:
+      - "Финансовый стресс активирует те же мозговые зоны, что и физическая боль — реакция человека на деньги глубоко эмоциональна, не только рациональна."
+      - "Стыд — частая сопутствующая реакция при финансовых трудностях. Люди боятся осуждения и скрывают проблему, что усиливает изоляцию."
+
+  - id: financial_fraud_trauma
+    title: "Мошенничество / Финансовый обман / Потеря накоплений"
+    emotion_signals:
+      - обманули
+      - меня обманули
+      - мошенники
+      - мошенничество
+      - мошеннический
+      - развели на деньги
+      - украли накопления
+      - потерял накопления
+      - потеряла накопления
+      - потерял сбережения
+      - потеряла сбережения
+      - инвестиционный обман
+      - финансовая пирамида
+      - пирамид
+      - скам
+      - скамеры
+      - лохотрон
+      - вложил деньги
+      - вложила деньги
+      - обман с деньгами
+      - scammed
+      - fraud
+      - swindled
+      - cheated out of money
+      - con artist
+      - investment scam
+      - lost my savings
+      - lost all my savings
+      - my savings are gone
+      - stole my savings
+      - took my savings
+      - romance scam
+      - pyramid scheme
+      - Ponzi scheme
+      - phishing
+    risk_signals:
+      - не могу простить себе
+      - какой я идиот
+      - всё потеряно
+      - нет смысла дальше
+    risk_ceiling: 2
+    recommended_techniques:
+      - guilt_vs_shame
+      - common_humanity_act
+      - labeling_dbt
+      - self_compassion_neff
+      - letter_to_friend_cbt
+    response_shape: "hear → validate_shame_first → reframe_trust_not_stupidity → presence"
+    do_rules:
+      - "Начни с признания стыда — это первое чувство, не деньги и не гнев"
+      - "Признай двойную потерю: деньги И доверие к себе и другим"
+      - "Объясни (не в лоб, а через валидацию): мошенники специально создают условия для доверия — это не наивность, это использование человеческих качеств"
+      - "Не торопись к советам о возврате денег или обращении в полицию"
+      - "Создай пространство для смешанных чувств: стыд, злость, горе, растерянность — всё уместно"
+    dont_rules:
+      - "Don't imply the user should have known better — even implicitly"
+      - "Don't focus on financial recovery or practical steps in the first response"
+      - "Don't say 'at least you learned your lesson'"
+      - "Don't minimize the loss as just money"
+      - "Don't push for professional referral before validating the pain"
+    contraindications: []
+    escalation_rules:
+      - "If financial ruin generates suicidal ideation → escalate to Tier 3"
+    knowledge_snippets:
+      - "Жертвы мошенничества чаще всего испытывают прежде всего стыд, а не гнев — мошенники эксплуатируют доверие и желание помочь, которые являются силой, а не слабостью."
+      - "Потеря накоплений через обман несёт двойную травму: финансовую (потеря денег) и экзистенциальную (потеря ощущения, что умеешь разбираться в людях и защищать себя)."
+      - "Социальная изоляция — ключевой механизм мошенничества и его последствий: стыд мешает рассказать близким, что усиливает боль. Просто присутствовать без осуждения — важнее советов."
+      - "Профессиональные мошеннические схемы создаются специально для обхода критического мышления — эффективный обман невозможен без доверия и симпатии жертвы."
+
+  - id: robbery_theft_trauma
+    title: "Ограбление / Кража / Нарушение безопасности"
+    emotion_signals:
+      - ограбили
+      - обокрали
+      - украли
+      - кражу
+      - воры
+      - вломились
+      - залезли в квартиру
+      - взломали дверь
+      - потерял всё
+      - лишился вещей
+      - robbed
+      - stolen
+      - burglary
+      - break-in
+      - mugged
+      - theft
+      - they broke in
+      - my house was robbed
+      - everything stolen
+    risk_signals:
+      - чувствую себя в опасности
+      - боюсь возвращаться домой
+    risk_ceiling: 2
+    recommended_techniques:
+      - grounding_54321
+      - labeling_dbt
+      - permission_to_grieve
+      - physical_discharge
+      - body_grounding
+    response_shape: "hear → check_current_safety → suggest_one_stabilizing_step → invite_to_share"
+    do_rules:
+      - "Первым делом признай нарушение ощущения безопасности — не просто потерю вещей"
+      - "Спроси, в безопасности ли человек прямо сейчас — есть ли место, где он может побыть в безопасности, или рядом есть кто-то доверенный"
+      - "Предложи один практический шаг стабилизации: перейти в более безопасное место, написать или позвонить кому-то близкому, не оставаться одному"
+      - "Упомяни местные службы (полиция, охрана здания) только как практическую опцию — не как юридический совет"
+      - "Используй заземление только после того, как безопасность признана и проверена"
+      - "Валидируй гипербдительность и навязчивые мысли как нормальные защитные реакции"
+      - "Создай пространство для гнева — на преступника, на систему, на ситуацию"
+    dont_rules:
+      - "Don't ask about sentimental items (jewelry, photos, gifts) unless the user brings them up first"
+      - "Don't invent details not present in the user's message — no timing, location, injuries, or police involvement unless stated"
+      - "Don't focus on security advice — this is emotional support, not prevention"
+      - "Don't minimize with 'at least no one was hurt'"
+      - "Don't say 'things can be replaced'"
+      - "Don't push for police report or insurance steps immediately"
+      - "Don't offer multiple techniques at once — presence first"
+    contraindications: []
+    escalation_rules:
+      - "If robbery involved physical harm or trauma → consider Tier 2 for PTSD response"
+      - "If safety remains compromised (ongoing threat) → refer to emergency services"
+    knowledge_snippets:
+      - "После кражи или ограбления человек переживает нарушение базового ощущения безопасности пространства — особенно при взломе жилья. Это глубже, чем просто потеря вещей."
+      - "Если человек сам упоминает предметы с историей — украшения, фотографии, подарки — горе об их утрате реально и глубже денежной стоимости. Не инициируй эту тему первым."
+      - "Гипербдительность, проверка замков, навязчивые мысли об инциденте — нормальные защитные реакции нервной системы. Они проходят по мере того, как восстанавливается ощущение безопасности."
 
   - id: serious_illness_or_disability
     title: "Серьёзная болезнь / Инвалидность / Хроническая боль"

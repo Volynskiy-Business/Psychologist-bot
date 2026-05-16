@@ -110,6 +110,8 @@ def _detect_scenario(text: str) -> tuple[str, str, float]:
         "death_of_loved_one": "grief",
         "job_loss": "loss_of_meaning",
         "financial_loss": "anxiety",
+        "financial_fraud_trauma": "shame",
+        "robbery_theft_trauma": "trauma",
         "serious_illness_or_disability": "uncertainty",
         "passive_death_thoughts": "passive_death_thoughts",
         "possible_self_harm": "possible_self_harm",

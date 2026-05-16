@@ -40,8 +40,14 @@ Return only the rewritten response — no explanations."""
 def build_humanization_prompt(draft: str, user_message: str, lang: str) -> str:
     """Build a system prompt + user message for the humanization rewrite call."""
     base = _BASE_RU if lang == "ru" else _BASE_EN
+    if lang == "ru":
+        return (
+            f"{base}\n\n"
+            f"Сообщение пользователя:\n{user_message}\n\n"
+            f"Черновик ответа:\n{draft}"
+        )
     return (
         f"{base}\n\n"
-        f"Сообщение пользователя:\n{user_message}\n\n"
-        f"Черновик ответа:\n{draft}"
+        f"User message:\n{user_message}\n\n"
+        f"Draft response:\n{draft}"
     )

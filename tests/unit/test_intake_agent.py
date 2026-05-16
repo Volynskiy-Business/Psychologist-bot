@@ -135,3 +135,42 @@ def test_risk_signals_populated_when_detected():
     result = classify_intake("устала жить, никому не нужна")
     assert result.risk_tier == RiskTier.TIER_2
     assert len(result.risk_signals) >= 1
+
+
+def test_death_of_loved_one_en_not_misrouted_as_breakup():
+    """English death message must route to death_of_loved_one, not breakup_divorce."""
+    result = classify_intake("My mother died and I don't know how to live now")
+    assert result.scenario_id != "breakup_divorce", (
+        "Death of a loved one misrouted as breakup_divorce"
+    )
+    assert result.scenario_id in ("death_of_loved_one", "sadness_grief", "loss_of_meaning")
+
+
+def test_english_passive_disappearance_is_tier2():
+    """English passive disappearance wish must trigger Tier 2 safety awareness."""
+    result = classify_intake("I just want to disappear and not exist anymore")
+    assert result.risk_tier == RiskTier.TIER_2
+
+
+# ── Fraud routing — negative cases (no false positives on savings talk) ────
+
+def test_savings_alone_does_not_route_to_fraud_trauma():
+    """Generic savings mention without fraud context must not trigger financial_fraud_trauma."""
+    result = classify_intake("I'm worried about my savings because of inflation.")
+    assert result.scenario_id != "financial_fraud_trauma"
+
+
+def test_save_money_does_not_route_to_fraud_trauma():
+    result = classify_intake("I want to save money for the future.")
+    assert result.scenario_id != "financial_fraud_trauma"
+
+
+def test_anxious_about_saving_does_not_route_to_fraud_trauma():
+    result = classify_intake("I'm anxious about saving for retirement.")
+    assert result.scenario_id != "financial_fraud_trauma"
+
+
+def test_fraud_with_scammed_routes_correctly():
+    """Explicit fraud signal + savings still routes to financial_fraud_trauma."""
+    result = classify_intake("I got scammed and lost all my savings.")
+    assert result.scenario_id == "financial_fraud_trauma"

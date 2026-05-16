@@ -83,6 +83,12 @@ def build_support_prompt(
         parts.append(f"\n━━━ ТЕКУЩИЙ СЦЕНАРИЙ ━━━\n{scenario.title}")
         parts.append(f"Порядок ответа: {scenario.response_shape}")
 
+        if scenario.knowledge_snippets:
+            snippets = "\n".join(f"• {s}" for s in scenario.knowledge_snippets)
+            parts.append(
+                f"\nПСИХОЛОГИЧЕСКИЙ КОНТЕКСТ (внутренний — переводи в тёплую поддержку, не пересказывай как теорию):\n{snippets}"
+            )
+
         if scenario.do_rules:
             rules = "\n".join(f"• {r}" for r in scenario.do_rules)
             parts.append(f"\nДЕЛАЙ:\n{rules}")

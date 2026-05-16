@@ -7,10 +7,13 @@ import httpx
 from aiogram import Router, types
 from aiogram.filters import Command
 
+from app.ai.agents.anxiety_support import AnxietySupportAgent
+from app.ai.agents.friendly_conversation import FriendlyConversationAgent
 from app.ai.openrouter_client import OpenRouterClient
 from app.ai.orchestration.pipeline import SupportPipeline
 from app.ai.routing.intake import detect_language
 from app.bot.handlers.i18n import get_text, get_user_language
+from app.bot.user_state import MODE_ANXIETY_SUPPORT, MODE_FRIENDLY_CHAT, get_mode
 from app.bot.handlers.mood import consume_note_waiter, is_awaiting_note
 from app.config import settings
 from app.services.user_service import has_consent, record_safety_event, save_mood_note
@@ -173,15 +176,21 @@ async def handle_message(message: types.Message) -> None:
             await client.close()
             return
 
-    # Step 3: Multi-agent support pipeline with model fallback
+    # Step 3: Route to FriendlyConversationAgent or SupportPipeline based on user mode
+    user_mode = get_mode(message.from_user.id)
     history = _get_history(message.from_user.id)
     typing_task = asyncio.create_task(_keep_typing(message))
     try:
         result = None
         for model in ([settings.default_model] + settings.fallback_models):
-            pipeline = SupportPipeline(client, model=model)
+            if user_mode == MODE_FRIENDLY_CHAT:
+                agent = FriendlyConversationAgent(client, model=model)
+            elif user_mode == MODE_ANXIETY_SUPPORT:
+                agent = AnxietySupportAgent(client, model=model)
+            else:
+                agent = SupportPipeline(client, model=model)
             try:
-                result = await pipeline.run(user_text, msg_lang, history)
+                result = await agent.run(user_text, msg_lang, history)
                 logger.debug("stage=support_generation model=%s status=success", model)
                 break
             except httpx.HTTPStatusError as exc:

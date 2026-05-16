@@ -26,9 +26,15 @@ class SafetyClassification:
 
 
 class SafetyClassifier:
-    def __init__(self, client: OpenRouterClient, model: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        client: OpenRouterClient,
+        model: Optional[str] = None,
+        fallback_models: Optional[list[str]] = None,
+    ) -> None:
         self.client = client
         self.model = model or None
+        self.fallback_models = fallback_models or []
 
     async def classify(self, user_message: str, context: str = "") -> SafetyClassification:
         messages = [
@@ -39,44 +45,51 @@ class SafetyClassifier:
             },
         ]
 
-        _model_label = self.model or "default"
+        models_to_try = [self.model] + [m for m in self.fallback_models if m != self.model]
+        last_exc: Optional[Exception] = None
 
-        try:
-            response = await self.client.chat_completion(
-                messages=messages,
-                model=self.model,
-                temperature=0.0,
-                max_tokens=200,
-                response_format={"type": "json_object"},
-            )
-        except httpx.HTTPStatusError as exc:
-            status = exc.response.status_code
-            if status == 429:
-                logger.warning("stage=classifier error=rate_limited model=%s", _model_label)
-            elif status in (401, 403):
-                logger.error("stage=classifier error=auth_config model=%s status=%d", _model_label, status)
-            else:
-                logger.error("stage=classifier error=http model=%s status=%d", _model_label, status)
-            raise
-        except httpx.TimeoutException:
-            logger.warning("stage=classifier error=timeout model=%s", _model_label)
-            raise
-        except httpx.ConnectError:
-            logger.warning("stage=classifier error=network model=%s", _model_label)
-            raise
+        for model in models_to_try:
+            try:
+                response = await self.client.chat_completion(
+                    messages=messages,
+                    model=model,
+                    temperature=0.0,
+                    max_tokens=200,
+                    response_format={"type": "json_object"},
+                )
+            except httpx.HTTPStatusError as exc:
+                status = exc.response.status_code
+                if status == 429:
+                    logger.warning("stage=classifier error=rate_limited model=%s; trying next", model or "default")
+                    last_exc = exc
+                    continue
+                if status in (401, 403):
+                    logger.error("stage=classifier error=auth_config model=%s status=%d", model or "default", status)
+                else:
+                    logger.error("stage=classifier error=http model=%s status=%d", model or "default", status)
+                raise
+            except httpx.TimeoutException:
+                logger.warning("stage=classifier error=timeout model=%s", model or "default")
+                raise
+            except httpx.ConnectError:
+                logger.warning("stage=classifier error=network model=%s", model or "default")
+                raise
 
-        try:
-            data = json.loads(response.content)
-            return SafetyClassification(data)
-        except (json.JSONDecodeError, KeyError, ValueError):
-            logger.warning("stage=classifier error=parse_failed model=%s", _model_label)
-            return SafetyClassification(
-                {
-                    "risk_level": 2,
-                    "risk_type": "unknown",
-                    "confidence": 0.0,
-                    "reason": "Failed to parse classifier response",
-                    "requires_crisis_response": False,
-                    "requires_professional_referral": True,
-                }
-            )
+            try:
+                data = json.loads(response.content)
+                return SafetyClassification(data)
+            except (json.JSONDecodeError, KeyError, ValueError):
+                logger.warning("stage=classifier error=parse_failed model=%s", model or "default")
+                return SafetyClassification(
+                    {
+                        "risk_level": 2,
+                        "risk_type": "unknown",
+                        "confidence": 0.0,
+                        "reason": "Failed to parse classifier response",
+                        "requires_crisis_response": False,
+                        "requires_professional_referral": True,
+                    }
+                )
+
+        logger.error("stage=classifier error=all_models_rate_limited models=%s", models_to_try)
+        raise last_exc  # type: ignore[misc]

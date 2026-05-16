@@ -30,6 +30,13 @@ LEVEL_2_PATTERNS = [
     r"\bлучше бы меня не было\b",
     r"\bхотел(а)? бы исчезнуть\b",
     r"\bхочу раствориться\b",
+    # Russian — passive death-wish (idiomatic; no explicit intent)
+    r"\bжить не хочется\b",
+    r"\bне хочется жить\b",
+    r"\bнадоело жить\b",
+    r"\bустал(а)? жить\b",
+    r"\bнет желания жить\b",
+    r"\bжизнь не нужна\b",
 ]
 
 # Level 4 triggers - imminent risk

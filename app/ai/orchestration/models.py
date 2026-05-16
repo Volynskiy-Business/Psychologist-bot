@@ -35,6 +35,7 @@ class ScenarioData(BaseModel):
     dont_rules: list[str]
     contraindications: list[str]
     escalation_rules: list[str]
+    knowledge_snippets: list[str] = []
 
 
 class TechniqueData(BaseModel):

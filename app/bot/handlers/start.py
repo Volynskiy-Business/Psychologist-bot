@@ -6,6 +6,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 
 from app.bot.handlers.i18n import get_text, get_user_language, load_translation
+from app.bot.user_state import MODE_ANXIETY_SUPPORT, MODE_FRIENDLY_CHAT, clear_mode, set_mode
 from app.services.user_service import DeleteUserDataResult, delete_user_data, grant_consent, has_consent
 
 logger = logging.getLogger(__name__)
@@ -157,6 +158,7 @@ async def on_back_to_start(callback: types.CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "back_to_menu")
 async def on_back_to_menu(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
+    clear_mode(callback.from_user.id)
     await callback.message.edit_text(
         get_text("start.thanks", lang),
         reply_markup=main_menu_keyboard(lang),
@@ -169,6 +171,7 @@ async def on_back_to_menu(callback: types.CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "mode_chat")
 async def on_mode_chat(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
+    set_mode(callback.from_user.id, MODE_FRIENDLY_CHAT)
     await callback.message.edit_text(
         get_text("modes.chat_intro", lang),
         reply_markup=_back_to_menu_keyboard(lang),
@@ -179,6 +182,7 @@ async def on_mode_chat(callback: types.CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "mode_anxiety")
 async def on_mode_anxiety(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
+    set_mode(callback.from_user.id, MODE_ANXIETY_SUPPORT)
     await callback.message.edit_text(
         get_text("modes.anxiety_intro", lang),
         reply_markup=_back_to_menu_keyboard(lang),
@@ -189,6 +193,7 @@ async def on_mode_anxiety(callback: types.CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "mode_sad")
 async def on_mode_sad(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
+    clear_mode(callback.from_user.id)
     await callback.message.edit_text(
         get_text("modes.sad_intro", lang),
         reply_markup=_back_to_menu_keyboard(lang),

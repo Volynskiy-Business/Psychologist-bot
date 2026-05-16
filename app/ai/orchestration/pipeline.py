@@ -35,7 +35,8 @@ class SupportPipeline:
         # Step 1: Deterministic intake classification
         intake = classify_intake(user_text, lang)
         logger.debug(
-            "stage=intake scenario=%s emotion=%s risk_tier=%d intensity=%.2f",
+            "stage=intake lang=%s scenario=%s emotion=%s risk_tier=%d intensity=%.2f",
+            intake.language,
             intake.scenario_id,
             intake.detected_emotion,
             intake.risk_tier,

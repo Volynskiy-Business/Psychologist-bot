@@ -285,3 +285,41 @@ async def test_pipeline_english_job_loss():
     result = await pipeline.run("I lost my job today and I don't know what to do", lang="en", history=[])
     assert result.scenario_id in ("job_loss", "exhaustion", "uncertainty", "sadness_grief")
     assert result.intake_language == "en"
+
+
+@pytest.mark.asyncio
+async def test_pipeline_en_death_not_breakup_despite_prior_breakup_history():
+    """English death-of-loved-one message must not be routed as breakup even with prior breakup history."""
+    client = _make_client()
+    pipeline = SupportPipeline(client)
+    prior_history = [
+        {"role": "user", "content": "My girlfriend broke up with me"},
+        {"role": "assistant", "content": "I hear how much pain you're in after this breakup."},
+    ]
+    result = await pipeline.run(
+        "My mother died and I don't know how to live now",
+        lang="en",
+        history=prior_history,
+    )
+    assert result.scenario_id != "breakup_divorce", (
+        "Death of a loved one was misrouted as breakup_divorce due to history"
+    )
+    assert result.scenario_id in ("death_of_loved_one", "sadness_grief", "loss_of_meaning")
+
+
+@pytest.mark.asyncio
+async def test_pipeline_english_input_sets_intake_language_en():
+    """English user message must produce intake_language == 'en' regardless of history."""
+    client = _make_client()
+    pipeline = SupportPipeline(client)
+    result = await pipeline.run("I feel very sad and lonely today", lang="en", history=[])
+    assert result.intake_language == "en"
+
+
+@pytest.mark.asyncio
+async def test_pipeline_passive_disappearance_en_is_tier2():
+    """English passive disappearance wish must produce Tier 2 risk in the pipeline."""
+    client = _make_client()
+    pipeline = SupportPipeline(client)
+    result = await pipeline.run("I just want to disappear and not exist anymore", lang="en", history=[])
+    assert result.risk_tier == RiskTier.TIER_2

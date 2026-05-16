@@ -309,3 +309,255 @@ def test_passive_risk_response_is_longer_than_crisis_response() -> None:
     crisis = get_text("crisis.response", "en")
     assert len(passive) > 0
     assert len(crisis) > 0
+
+
+# ---------------------------------------------------------------------------
+# G. Financial fraud trauma — routing and knowledge snippets
+# ---------------------------------------------------------------------------
+
+
+def test_g_fraud_ru_routes_to_financial_fraud_trauma() -> None:
+    result = classify_intake("Меня обманули мошенники, я потерял все накопления.", "ru")
+    assert result.scenario_id == "financial_fraud_trauma"
+
+
+def test_g_fraud_en_routes_to_financial_fraud_trauma() -> None:
+    result = classify_intake("I got scammed and lost all my savings.", "en")
+    assert result.scenario_id == "financial_fraud_trauma"
+
+
+def test_g_fraud_scheme_ru_routes_to_financial_fraud_trauma() -> None:
+    result = classify_intake("Я вложил деньги в финансовую пирамиду и потерял всё.", "ru")
+    assert result.scenario_id == "financial_fraud_trauma"
+
+
+def test_g_fraud_scenario_has_knowledge_snippets() -> None:
+    from app.ai.scenarios.loader import get_scenario
+
+    scenario = get_scenario("financial_fraud_trauma")
+    assert scenario is not None
+    assert len(scenario.knowledge_snippets) >= 3
+
+
+def test_g_fraud_not_caught_by_crisis_detector() -> None:
+    # Fraud victim expressing shame is not imminent crisis
+    risk, _ = deterministic_crisis_check("Меня обманули мошенники. Какой же я идиот.")
+    assert risk < RiskLevel.POSSIBLE_CRISIS
+
+
+# ---------------------------------------------------------------------------
+# H. Robbery/theft trauma — routing and knowledge snippets
+# ---------------------------------------------------------------------------
+
+
+def test_h_robbery_ru_routes_to_robbery_theft_trauma() -> None:
+    result = classify_intake("Меня ограбили вчера вечером. Забрали всё.", "ru")
+    assert result.scenario_id == "robbery_theft_trauma"
+
+
+def test_h_theft_ru_routes_to_robbery_theft_trauma() -> None:
+    result = classify_intake("Пока меня не было дома, вломились и всё украли.", "ru")
+    assert result.scenario_id == "robbery_theft_trauma"
+
+
+def test_h_robbery_en_routes_to_robbery_theft_trauma() -> None:
+    result = classify_intake("I was robbed last night. They took everything.", "en")
+    assert result.scenario_id == "robbery_theft_trauma"
+
+
+def test_h_robbery_scenario_has_knowledge_snippets() -> None:
+    from app.ai.scenarios.loader import get_scenario
+
+    scenario = get_scenario("robbery_theft_trauma")
+    assert scenario is not None
+    assert len(scenario.knowledge_snippets) >= 3
+
+
+def test_h_robbery_not_caught_by_crisis_detector() -> None:
+    # Robbery victim is not imminent crisis (unless explicit self-harm)
+    risk, _ = deterministic_crisis_check("Меня ограбили. Я в шоке и не могу успокоиться.")
+    assert risk < RiskLevel.POSSIBLE_CRISIS
+
+
+# ---------------------------------------------------------------------------
+# I. Knowledge snippets are marked as internal context in the support prompt
+# ---------------------------------------------------------------------------
+
+
+def test_i_knowledge_snippets_marked_as_internal_in_prompt() -> None:
+    from app.ai.orchestration.models import IntakeResult, RiskTier
+    from app.ai.prompts.support_agent_prompt import build_support_prompt
+    from app.ai.scenarios.loader import get_scenario
+    from app.ai.techniques.loader import select_technique
+
+    intake = IntakeResult(
+        language="ru",
+        detected_emotion="shame",
+        intensity=0.7,
+        scenario_id="financial_fraud_trauma",
+        risk_tier=RiskTier.TIER_1,
+        risk_signals=[],
+    )
+    scenario = get_scenario("financial_fraud_trauma")
+    technique = select_technique(scenario, RiskTier.TIER_1.value)
+    prompt = build_support_prompt(intake, scenario, technique)
+    assert "внутренний" in prompt
+    assert "не пересказывай как теорию" in prompt
+
+
+def test_i_knowledge_snippets_present_in_fraud_prompt() -> None:
+    from app.ai.orchestration.models import IntakeResult, RiskTier
+    from app.ai.prompts.support_agent_prompt import build_support_prompt
+    from app.ai.scenarios.loader import get_scenario
+    from app.ai.techniques.loader import select_technique
+
+    intake = IntakeResult(
+        language="en",
+        detected_emotion="shame",
+        intensity=0.6,
+        scenario_id="financial_fraud_trauma",
+        risk_tier=RiskTier.TIER_1,
+        risk_signals=[],
+    )
+    scenario = get_scenario("financial_fraud_trauma")
+    technique = select_technique(scenario, RiskTier.TIER_1.value)
+    prompt = build_support_prompt(intake, scenario, technique)
+    assert "ПСИХОЛОГИЧЕСКИЙ КОНТЕКСТ" in prompt
+    assert len(prompt) > 500
+
+
+# ---------------------------------------------------------------------------
+# I. Humanization prompt — English path uses English labels
+# ---------------------------------------------------------------------------
+
+
+def test_i_humanization_prompt_english_uses_english_labels() -> None:
+    from app.ai.prompts.humanization_prompt import build_humanization_prompt
+
+    prompt = build_humanization_prompt(
+        draft="I hear you. It sounds really painful.",
+        user_message="I feel so ashamed after being scammed.",
+        lang="en",
+    )
+    assert "User message:" in prompt
+    assert "Draft response:" in prompt
+    assert "Сообщение пользователя:" not in prompt
+
+
+def test_i_humanization_prompt_russian_uses_russian_labels() -> None:
+    from app.ai.prompts.humanization_prompt import build_humanization_prompt
+
+    prompt = build_humanization_prompt(
+        draft="Я слышу тебя.",
+        user_message="Меня обманули мошенники.",
+        lang="ru",
+    )
+    assert "Сообщение пользователя:" in prompt
+    assert "Черновик ответа:" in prompt
+    assert "User message:" not in prompt
+
+
+# ---------------------------------------------------------------------------
+# I. Savings without fraud context — negative routing
+# ---------------------------------------------------------------------------
+
+
+def test_i_savings_mention_without_fraud_does_not_route_to_fraud_trauma() -> None:
+    result = classify_intake("I'm worried about my savings because of inflation.", "en")
+    assert result.scenario_id != "financial_fraud_trauma"
+
+
+def test_i_savings_ru_without_fraud_does_not_route_to_fraud_trauma() -> None:
+    result = classify_intake("Как мне лучше копить деньги?", "ru")
+    assert result.scenario_id != "financial_fraud_trauma"
+
+
+# ---------------------------------------------------------------------------
+# J. Robbery / home safety — response shape, prompt directives, routing
+# ---------------------------------------------------------------------------
+
+
+def test_j_robbery_en_routes_to_robbery_theft_trauma() -> None:
+    result = classify_intake("My apartment was robbed. I can't feel safe at home anymore.", "en")
+    assert result.scenario_id == "robbery_theft_trauma"
+
+
+def test_j_robbery_ru_routes_to_robbery_theft_trauma() -> None:
+    result = classify_intake("Меня ограбили. Я больше не чувствую себя в безопасности дома.", "ru")
+    assert result.scenario_id == "robbery_theft_trauma"
+
+
+def test_j_robbery_scenario_response_shape_prioritizes_safety() -> None:
+    from app.ai.scenarios.loader import get_scenario
+
+    scenario = get_scenario("robbery_theft_trauma")
+    assert scenario is not None
+    assert "safe" in scenario.response_shape.lower()
+
+
+def test_j_robbery_scenario_do_rules_do_not_instruct_sentimental_items() -> None:
+    from app.ai.scenarios.loader import get_scenario
+
+    scenario = get_scenario("robbery_theft_trauma")
+    assert scenario is not None
+    for rule in scenario.do_rules:
+        rule_lower = rule.lower()
+        assert "украшени" not in rule_lower, f"do_rule should not prompt for jewelry: {rule}"
+        assert "фотограф" not in rule_lower, f"do_rule should not prompt for photos: {rule}"
+        assert "подарк" not in rule_lower, f"do_rule should not prompt for gifts: {rule}"
+        assert "jewelry" not in rule_lower, f"do_rule should not prompt for jewelry: {rule}"
+        assert "photos" not in rule_lower, f"do_rule should not prompt for photos: {rule}"
+        assert "gifts" not in rule_lower, f"do_rule should not prompt for gifts: {rule}"
+
+
+def test_j_robbery_scenario_dont_rules_restrict_invented_details() -> None:
+    from app.ai.scenarios.loader import get_scenario
+
+    scenario = get_scenario("robbery_theft_trauma")
+    assert scenario is not None
+    combined = " ".join(scenario.dont_rules).lower()
+    assert "invent" in combined or "timing" in combined or "unless stated" in combined
+
+
+def test_j_robbery_prompt_en_includes_safety_and_language_directive() -> None:
+    from app.ai.orchestration.models import IntakeResult, RiskTier
+    from app.ai.prompts.support_agent_prompt import build_support_prompt
+    from app.ai.scenarios.loader import get_scenario
+    from app.ai.techniques.loader import select_technique
+
+    intake = IntakeResult(
+        language="en",
+        detected_emotion="fear",
+        intensity=0.7,
+        scenario_id="robbery_theft_trauma",
+        risk_tier=RiskTier.TIER_1,
+        risk_signals=[],
+    )
+    scenario = get_scenario("robbery_theft_trauma")
+    technique = select_technique(scenario, RiskTier.TIER_1.value)
+    prompt = build_support_prompt(intake, scenario, technique)
+    assert "«en»" in prompt
+    prompt_lower = prompt.lower()
+    assert any(kw in prompt_lower for kw in ["safe", "безопасн"])
+
+
+def test_j_robbery_prompt_ru_includes_safety_and_language_directive() -> None:
+    from app.ai.orchestration.models import IntakeResult, RiskTier
+    from app.ai.prompts.support_agent_prompt import build_support_prompt
+    from app.ai.scenarios.loader import get_scenario
+    from app.ai.techniques.loader import select_technique
+
+    intake = IntakeResult(
+        language="ru",
+        detected_emotion="fear",
+        intensity=0.7,
+        scenario_id="robbery_theft_trauma",
+        risk_tier=RiskTier.TIER_1,
+        risk_signals=[],
+    )
+    scenario = get_scenario("robbery_theft_trauma")
+    technique = select_technique(scenario, RiskTier.TIER_1.value)
+    prompt = build_support_prompt(intake, scenario, technique)
+    assert "«ru»" in prompt
+    prompt_lower = prompt.lower()
+    assert "безопасн" in prompt_lower
