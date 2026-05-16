@@ -46,6 +46,9 @@ jobs:
       - name: Run tests with coverage
         run: pytest tests/ -v --cov=app --cov-report=xml --cov-report=term
 
+      - name: Run eval regression suite
+        run: pytest tests/eval/ -v --tb=short
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
