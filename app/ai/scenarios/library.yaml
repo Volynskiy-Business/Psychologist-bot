@@ -297,6 +297,11 @@ scenarios:
     title: "Потеря смысла / Апатия / Экзистенциальный кризис"
     emotion_signals:
       - нет смысла
+      - теряю смысл
+      - теряю смысл жизни
+      - потерял смысл
+      - потеряла смысл
+      - потеря смысла
       - апатия
       - апатично
       - зачем
@@ -307,6 +312,9 @@ scenarios:
       - безразличие
       - meaningless
       - no meaning
+      - losing meaning
+      - lost all meaning
+      - lost my sense of purpose
       - apathy
       - apathetic
       - pointless
@@ -446,7 +454,7 @@ scenarios:
       - "If user mentions overdose risk → escalate to Tier 4"
 
   - id: breakup_divorce
-    title: "Расставание / Развод / Разрыв отношений"
+    title: "Расставание / Развод / Измена / Разрыв отношений"
     emotion_signals:
       - расставание
       - развод
@@ -458,12 +466,28 @@ scenarios:
       - расстались
       - бывший
       - бывшая
+      - изменил
+      - изменила
+      - изменяет
+      - предал
+      - предала
+      - предательство
+      - к другому
+      - к другой
+      - ушёл к другой
+      - ушла к другому
       - broke up
       - breakup
       - divorce
       - divorced
       - separation
       - left me
+      - cheated
+      - cheating
+      - betrayal
+      - betrayed
+      - affair
+      - infidelity
     risk_signals:
       - не могу без него
       - не могу без неё
@@ -473,20 +497,25 @@ scenarios:
       - labeling_dbt
       - self_compassion_neff
       - permission_to_grieve
-    response_shape: "hear → validate_identity_loss → normalize → one_tool → invite_continue"
+    response_shape: "hear → validate_betrayal_and_grief → normalize → one_tool → invite_continue"
     do_rules:
-      - "Acknowledge the pain of loss, not just the practical change"
+      - "Acknowledge the pain of loss — not just the breakup, but the history, the future that was planned, and the trust that was broken"
+      - "When betrayal is present, validate the specific wound of being deceived — this is not ordinary sadness"
       - "Validate grief over the relationship and the future that was imagined"
-      - "Normalize identity disruption — it is normal to feel lost after a relationship ends"
-      - "Offer one self-compassion or emotion-labeling tool"
+      - "Normalize identity disruption — it is normal to feel lost and hollowed out after years together"
+      - "Let the user tell the story without rushing to comfort or solution"
+      - "Offer one self-compassion or emotion-labeling tool only after the pain is heard"
     dont_rules:
       - "Don't say 'you'll find someone better' or 'there are plenty of fish'"
       - "Don't minimize the pain even if the relationship was difficult"
       - "Don't analyze the relationship dynamics or assign blame"
+      - "Don't rush to practical steps — hold the pain first"
+      - "Don't push the user to 'move on' or see positives"
     contraindications:
       - "Avoid behavioral activation in acute grief — normalize and hold first"
     escalation_rules:
       - "If user expresses hopelessness about ever connecting again → escalate to Tier 2"
+      - "If betrayal grief includes loss of will to live → escalate to Tier 3"
 
   - id: death_of_loved_one
     title: "Потеря близкого человека / Горе утраты"
@@ -666,19 +695,22 @@ scenarios:
       - зачем жить
     risk_ceiling: 2
     recommended_techniques: []
-    response_shape: "acknowledge_pain → validate_without_amplifying → crisis_resources → human_referral"
+    response_shape: "acknowledge_pain → validate_warmly → gentle_safety_check → invite_to_continue"
     do_rules:
-      - "Acknowledge the pain directly and without judgment"
-      - "Do not panic or lecture — stay calm and warm"
-      - "Gently direct toward a human — a trusted person or a crisis line"
-      - "Be brief: this is not a moment for techniques or exercises"
+      - "Acknowledge the pain directly, warmly, and without judgment — this is a very heavy place to be"
+      - "Stay calm and steady — do not panic or over-escalate"
+      - "Ask one clear, gentle safety check: are you safe right now? Is there a risk of self-harm today?"
+      - "If the user says they are safe — stay with them and invite them to share more"
+      - "If the user signals imminent danger — guide to emergency services and a nearby person"
     dont_rules:
-      - "Don't offer cognitive techniques or exercises in response to passive death wishes"
+      - "Don't open with emergency services — safety check first, escalation only if needed"
+      - "Don't offer techniques or exercises — presence and safety check only"
       - "Don't dismiss or minimize the thought"
-      - "Don't ask probing questions about plans"
-      - "Don't promise that feelings will go away"
+      - "Don't ask probing questions about plans or methods"
+      - "Don't promise feelings will go away"
+      - "Don't end without inviting the user to continue talking"
     contraindications:
-      - "No self-help techniques are appropriate — human referral is the priority"
+      - "No self-help techniques are appropriate at this tier"
     escalation_rules:
       - "Any indication of active plan or means → escalate to Tier 3 immediately"
 

@@ -1,8 +1,8 @@
 """Multi-agent support pipeline.
 
 Orchestrates intake classification → scenario/technique selection →
-LLM response generation → safety validation for each user message.
-Single LLM call per user turn to keep latency acceptable on free-tier models.
+LLM response generation → quality check → humanization rewrite (if needed) →
+safety validation for each user message.
 """
 
 import logging
@@ -11,7 +11,9 @@ from typing import Optional
 from app.ai.openrouter_client import OpenRouterClient
 from app.ai.orchestration.models import PipelineResult
 from app.ai.output_validation import validate_support_response
+from app.ai.prompts.humanization_prompt import build_humanization_prompt
 from app.ai.prompts.support_agent_prompt import build_support_prompt
+from app.ai.response_quality import check_response_quality
 from app.ai.routing.intake import classify_intake
 from app.ai.scenarios.loader import get_scenario
 from app.ai.techniques.loader import select_technique
@@ -64,9 +66,30 @@ class SupportPipeline:
             temperature=0.4,
             max_tokens=700,
         )
+        draft = response.content
 
-        # Step 5: Deterministic safety validation
-        is_safe, block_reason = validate_support_response(response.content)
+        # Step 5: Deterministic quality check → humanization rewrite if needed
+        quality = check_response_quality(draft, intake.risk_tier)
+        if quality.should_rewrite:
+            logger.info(
+                "stage=quality_rewrite issues=%s scenario=%s",
+                quality.issues(),
+                intake.scenario_id,
+            )
+            try:
+                humanization_prompt = build_humanization_prompt(draft, user_text, intake.language)
+                rewrite_response = await self.client.chat_completion(
+                    messages=[{"role": "user", "content": humanization_prompt}],
+                    model=self.model,
+                    temperature=0.3,
+                    max_tokens=500,
+                )
+                draft = rewrite_response.content
+            except Exception:
+                logger.exception("stage=quality_rewrite failed; using original draft")
+
+        # Step 6: Deterministic safety validation (runs after any rewrite)
+        is_safe, block_reason = validate_support_response(draft)
         if not is_safe:
             logger.warning(
                 "stage=output_validation blocked reason=%s scenario=%s",
@@ -75,7 +98,7 @@ class SupportPipeline:
             )
 
         return PipelineResult(
-            content=response.content,
+            content=draft,
             is_safe=is_safe,
             block_reason=block_reason,
             scenario_id=intake.scenario_id,

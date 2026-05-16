@@ -47,8 +47,9 @@
     "confirm_delete": "Yes, delete everything"
   },
   "crisis": {
-    "response": "It seems like this might be an unsafe moment. I cannot replace emergency help, but I can stay with you in chat.\n\nPlease do 3 things now:\n1. Call your local emergency service or crisis line.\n2. Text or call someone nearby: \"I'm not safe alone right now, stay with me.\"\n3. Put away anything you could hurt yourself with.\n\nReply with one word: are you alone right now?",
-    "elevated": "I hear that you're going through a very difficult time. This is important and serious.\n\nI can help with small steps right now, but if you've been feeling bad for a long time or it's getting worse, please reach out to a specialist.\n\nWould you like to do a short stabilization exercise?"
+    "response": "It seems like this might be an unsafe moment. I cannot replace real human help — reaching a real person is the most important step right now.\n\nPlease contact your local emergency services or a local crisis line now. If you can, reach out to someone you trust nearby and let them know you need support.\n\nPut away anything you could hurt yourself with.\n\nAre you alone right now?",
+    "elevated": "I hear you. What you're describing sounds more than just sadness — it feels like something deeper has shifted, and that matters.\n\nI'm here with you right now. I want to ask gently: are you safe right now? Is there any risk that you might hurt yourself?\n\nIf you're in immediate danger, please reach out to emergency services or someone nearby who can be with you. If you're not in immediate danger — stay with me. Tell me what's happening.",
+    "passive_risk": "I'm really sorry it feels this heavy. Wanting to disappear can happen when the pain has been too much for too long — it doesn't mean you have to face this alone right now.\n\nI'm here with you. Before we go further, I want to ask one thing gently: are you in immediate danger right now, or do you feel you might hurt yourself today?\n\nIf you are in immediate danger, please contact emergency services or someone nearby who can stay with you now. If you're not in immediate danger — stay with me for a moment. Tell me slowly what's been happening."
   },
   "mood": {
     "question": "📊 How are you feeling right now?",
