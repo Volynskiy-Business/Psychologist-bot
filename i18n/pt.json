@@ -19,7 +19,9 @@
     "mood": "📝 Diário de humor",
     "exercises": "🧘 Exercícios",
     "safety_plan": "📋 Plano de segurança",
-    "settings": "⚙️ Definições"
+    "settings": "⚙️ Definições",
+    "back": "🔙 Voltar",
+    "back_to_menu": "🔙 Voltar ao menu"
   },
   "crisis": {
     "response": "Parece que pode ser um momento inseguro. Não posso substituir a ajuda de emergência, mas posso ficar contigo no chat.\n\nPor favor, faz 3 coisas agora:\n1. Liga para os serviços de emergência locais ou uma linha de crise.\n2. Envia mensagem ou liga a alguém perto de ti: \"Não estou seguro sozinho agora, fica comigo.\"\n3. Afasta tudo com o que te possas fazer mal.\n\nResponde com uma palavra: estás sozinho agora?",
@@ -28,6 +30,11 @@
   "mood": {
     "question": "📊 Como te sentes agora?",
     "saved": "✅ Guardado: {mood}\n\nObrigado pela nota! Acompanhar o humor ajuda a notar padrões.\n\nQueres adicionar uma nota sobre o que influencia o teu estado?",
+    "add_note_prompt": "Podes adicionar uma breve nota sobre o que afetou o teu humor hoje.",
+    "note_saved": "A tua nota foi guardada.",
+    "buttons": {
+      "add_note": "Adicionar nota"
+    },
     "levels": {
       "5": "Excelente 😊",
       "4": "Bem 🙂",
@@ -38,7 +45,8 @@
   },
   "chat": {
     "prompt": "Estou aqui. Conta-me o que te preocupa. Eu ouço e ajudo a perceber.",
-    "error": "Desculpa, ocorreu um erro ao processar o teu pedido. Tenta mais tarde ou pede ajuda."
+    "error": "Desculpa, ocorreu um erro ao processar o teu pedido. Tenta mais tarde ou pede ajuda.",
+    "classifier_unavailable": "Estou temporariamente incapaz de processar a tua mensagem com segurança. Por favor, tenta novamente mais tarde.\n\nSe podes estar em perigo imediato ou não consegues manter-te seguro, contacta os serviços de emergência locais ou uma pessoa de confiança perto de ti agora."
   },
   "safety_plan": {
     "title": "📋 Plano de segurança",

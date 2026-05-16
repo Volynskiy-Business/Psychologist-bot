@@ -1,0 +1,102 @@
+{
+  "bot_name": "PsySupport AI",
+  "start": {
+    "greeting": "Hola. Soy {bot_name} — un asistente de IA para el apoyo emocional y el autocuidado psicológico.",
+    "capabilities": "Puedo ayudarte a:\n— entender emociones y pensamientos\n— reducir el estrés\n— hacer ejercicios de TCC/DBT/mindfulness\n— llevar un diario de estado de ánimo\n— elaborar un pequeño plan de acción",
+    "disclaimer": "No soy médico, psicoterapeuta ni servicio de crisis. No realizo diagnósticos ni prescribo tratamientos.",
+    "crisis_warning": "Si estás en peligro o tienes pensamientos de hacerte daño a ti mismo/a u otros, contacta con los servicios de emergencias, una línea de crisis o alguien cercano.",
+    "consent": "Al continuar, confirmas que entiendes estas limitaciones.",
+    "thanks": "Gracias por tu confianza. Elige por dónde quieres empezar:",
+    "buttons": {
+      "continue": "✅ Entiendo, continuar",
+      "crisis": "🆘 Necesito ayuda urgente",
+      "privacy": "🔒 Política de privacidad"
+    }
+  },
+  "menu": {
+    "chat": "🗣 Conversar",
+    "anxiety": "😰 Estoy ansioso/a",
+    "sad": "😔 Estoy triste",
+    "mood": "📝 Diario de ánimo",
+    "exercises": "🧘 Ejercicios",
+    "safety_plan": "📋 Plan de seguridad",
+    "settings": "⚙️ Ajustes",
+    "back": "🔙 Atrás",
+    "back_to_menu": "🔙 Volver al menú"
+  },
+  "modes": {
+    "chat_intro": "💬 Estoy aquí. Cuéntame lo que tienes en mente — te escucho y te ayudo a ordenar los pensamientos.\n\nEscribe tu mensaje.",
+    "anxiety_intro": "😰 Escucho que te sientes ansioso/a. Es normal — trabajemos esto juntos.\n\nCuéntame qué está pasando, o podemos hacer un ejercicio para calmarnos.\n\nEscribe tu mensaje.",
+    "sad_intro": "😔 Lamento que te sientas triste. Estoy aquí contigo.\n\nCuéntame qué ocurre, o podemos intentar algo suave juntos.\n\nEscribe tu mensaje."
+  },
+  "exercises": {
+    "title": "🧘 Ejercicios\n\nElige un ejercicio:",
+    "buttons": {
+      "breathing": "🫁 Respiración en caja",
+      "cbt": "💭 Registro de pensamientos TCC",
+      "mindfulness": "🌿 Anclaje 5-4-3-2-1"
+    },
+    "breathing": "🫁 Respiración en caja\n\nEsta técnica calma el sistema nervioso en 2–3 minutos.\n\n1. Inhala — cuenta lentamente hasta 4\n2. Retén — cuenta hasta 4\n3. Exhala — cuenta lentamente hasta 4\n4. Retén — cuenta hasta 4\n\nRepite 4–6 veces. Concéntrate solo en contar y en tu respiración. 🌬",
+    "cbt": "💭 Registro de pensamientos TCC\n\nAyuda a examinar pensamientos ansiosos o intrusivos.\n\nResponde en tus mensajes:\n\n1. ¿Qué situación te preocupa?\n2. ¿Qué pensamiento automático apareció?\n3. ¿Qué evidencia apoya ese pensamiento?\n4. ¿Qué evidencia lo contradice?\n5. ¿Cuál es una forma más equilibrada de verlo?\n\nEscribe tus respuestas — te ayudaré a trabajar cada paso. ✍️",
+    "mindfulness": "🌿 Anclaje: 5-4-3-2-1\n\nEsta técnica te devuelve al momento presente.\n\nNombra en voz alta o para ti mismo/a:\n\n5 cosas que puedes VER ahora mismo\n4 cosas que puedes TOCAR\n3 sonidos que puedes OÍR\n2 olores que puedes percibir\n1 sabor en tu boca\n\nRespira lentamente entre cada paso. 🌱"
+  },
+  "settings": {
+    "title": "⚙️ Ajustes",
+    "language": "🌐 Idioma de la interfaz",
+    "delete_data": "🗑 Eliminar mis datos",
+    "confirm_delete": "Sí, eliminar todo"
+  },
+  "crisis": {
+    "response": "Parece que este puede ser un momento de riesgo. No puedo reemplazar la ayuda de emergencia, pero puedo estar aquí contigo en el chat.\n\nPor favor, haz estas 3 cosas ahora:\n1. Llama a los servicios de emergencia locales o a una línea de crisis.\n2. Escribe o llama a alguien cercano: \"No estoy seguro/a solo/a ahora mismo, quédate conmigo.\"\n3. Aleja todo aquello con lo que puedas hacerte daño.\n\nResponde con una palabra: ¿estás solo/a ahora mismo?",
+    "elevated": "Escucho que estás pasando por un momento muy difícil. Eso es importante y serio.\n\nPuedo ayudarte con pequeños pasos ahora mismo, pero si llevas mucho tiempo sintiéndote mal o está empeorando, por favor contacta con un especialista.\n\n¿Te gustaría hacer un breve ejercicio de estabilización?"
+  },
+  "mood": {
+    "question": "📊 ¿Cómo te sientes ahora mismo?",
+    "saved": "✅ Guardado: {mood}\n\n¡Gracias por la nota! Registrar el estado de ánimo ayuda a detectar patrones.\n\n¿Te gustaría añadir una nota sobre lo que está influyendo en tu estado?",
+    "add_note_prompt": "Puedes añadir una breve nota sobre lo que afectó tu estado de ánimo hoy.",
+    "note_saved": "Tu nota se ha guardado.",
+    "buttons": {
+      "add_note": "Añadir una nota"
+    },
+    "levels": {
+      "5": "Genial 😊",
+      "4": "Bien 🙂",
+      "3": "Regular 😐",
+      "2": "No muy bien 😕",
+      "1": "Mal 😢"
+    }
+  },
+  "chat": {
+    "prompt": "Estoy aquí. Cuéntame qué te preocupa. Te escucho y te ayudo a entenderlo.",
+    "error": "Lo siento, ocurrió un error al procesar tu solicitud. Inténtalo de nuevo más tarde o pide ayuda.",
+    "consent_required": "Para chatear, primero acepta los términos de uso.",
+    "output_blocked": "No puedo enviar esa respuesta. Intenta reformular tu pregunta o consulta con un especialista cualificado para este tema.",
+    "rate_limited": "Estoy temporalmente al límite de capacidad y no puedo responder de forma segura ahora mismo. Por favor, inténtalo de nuevo en un momento. Si puedes estar en peligro inmediato, contacta con los servicios de emergencia locales o con una persona de confianza cercana.",
+    "classifier_unavailable": "Temporalmente no puedo procesar tu mensaje de forma segura. Por favor, inténtalo de nuevo más tarde.\n\nSi puedes estar en peligro inmediato o no te sientes seguro/a, contacta con los servicios de emergencia locales o con una persona de confianza cercana ahora."
+  },
+  "safety_plan": {
+    "title": "📋 Plan de seguridad",
+    "items": [
+      "1. Mis señales de alerta tempranas: _____________",
+      "2. Lo que puedo hacer por mí mismo/a en los primeros 10 minutos: _____________",
+      "3. Qué me ayuda a cambiar el foco: _____________",
+      "4. Personas a las que puedo escribir/llamar: _____________",
+      "5. Especialistas/servicios: _____________",
+      "6. Cómo hacer el espacio más seguro: _____________",
+      "7. Lo que me mantiene con vida: _____________",
+      "8. Lo que haré ahora mismo: _____________"
+    ],
+    "start_filling": "Empieza por rellenar cualquier punto. No es necesario hacerlo todo de una vez."
+  },
+  "privacy": {
+    "policy": "🔒 Política de privacidad\n\n• Minimizamos la recopilación de datos\n• Los mensajes no se almacenan por defecto (STORE_CONVERSATIONS=false)\n• Puedes eliminar tus datos con /delete_my_data\n• No compartimos datos con terceros",
+    "delete_confirm": "⚠️ ¿Estás seguro/a de que quieres eliminar todos tus datos? Esta acción no se puede deshacer.",
+    "deleted": "✅ Todos tus datos han sido eliminados.",
+    "not_found": "No se encontraron datos almacenados. Es posible que tu cuenta ya haya sido eliminada."
+  },
+  "errors": {
+    "generic": "Algo salió mal. Inténtalo de nuevo.",
+    "rate_limit": "Demasiados mensajes. Por favor, espera un momento.",
+    "model_unavailable": "El modelo de IA no está disponible temporalmente. Inténtalo de nuevo en un minuto."
+  }
+}

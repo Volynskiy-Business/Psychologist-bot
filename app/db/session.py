@@ -6,7 +6,7 @@ from app.config import settings
 
 engine = create_async_engine(
     settings.database_url.get_secret_value(),
-    echo=not settings.is_production,
+    echo=False,
     future=True,
 )
 

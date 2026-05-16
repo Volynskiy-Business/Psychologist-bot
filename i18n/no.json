@@ -19,7 +19,9 @@
     "mood": "📝 Humørdagbok",
     "exercises": "🧘 Øvelser",
     "safety_plan": "📋 Sikkerhetsplan",
-    "settings": "⚙️ Innstillinger"
+    "settings": "⚙️ Innstillinger",
+    "back": "🔙 Tilbake",
+    "back_to_menu": "🔙 Tilbake til menyen"
   },
   "crisis": {
     "response": "Det ser ut til at dette kan være et utrygt øyeblikk. Jeg kan ikke erstatte nødhjelp, men jeg kan være her i chatten.\n\nVennligst gjør 3 ting nå:\n1. Ring din lokale nødetat eller kriselinje.\n2. Send melding eller ring noen i nærheten: \"Jeg er ikke trygg alene nå, vær med meg.\"\n3. Legg vekk alt du kan skade deg selv med.\n\nSvar med ett ord: er du alene nå?",
@@ -28,6 +30,11 @@
   "mood": {
     "question": "📊 Hvordan føler du deg nå?",
     "saved": "✅ Lagret: {mood}\n\nTakk for notatet! Å følge humøret hjelper med å legge merke til mønstre.\n\nVil du legge til en notat om hva som påvirker tilstanden din?",
+    "add_note_prompt": "Du kan legge til et kort notat om hva som påvirket humøret ditt i dag.",
+    "note_saved": "Notatet ditt er lagret.",
+    "buttons": {
+      "add_note": "Legg til notat"
+    },
     "levels": {
       "5": "Utmerket 😊",
       "4": "Bra 🙂",
@@ -38,7 +45,8 @@
   },
   "chat": {
     "prompt": "Jeg er her. Fortell meg hva som bekymrer deg. Jeg lytter og hjelper deg å forstå.",
-    "error": "Beklager, det oppstod en feil under behandling av forespørselen din. Prøv igjen senere eller be om hjelp."
+    "error": "Beklager, det oppstod en feil under behandling av forespørselen din. Prøv igjen senere eller be om hjelp.",
+    "classifier_unavailable": "Jeg er midlertidig ikke i stand til å behandle meldingen din på en trygg måte. Vennligst prøv igjen senere.\n\nHvis du kan være i umiddelbar fare eller ikke klarer å holde deg trygg, kontakt nødetatene eller en betrodd person i nærheten av deg nå."
   },
   "safety_plan": {
     "title": "📋 Sikkerhetsplan",

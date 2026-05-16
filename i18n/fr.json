@@ -19,7 +19,9 @@
     "mood": "📝 Journal d'humeur",
     "exercises": "🧘 Exercices",
     "safety_plan": "📋 Plan de sécurité",
-    "settings": "⚙️ Paramètres"
+    "settings": "⚙️ Paramètres",
+    "back": "🔙 Retour",
+    "back_to_menu": "🔙 Retour au menu"
   },
   "crisis": {
     "response": "Il semble que ce soit un moment dangereux. Je ne peux pas remplacer l'aide d'urgence, mais je peux rester avec toi dans le chat.\n\nS'il te plaît, fais 3 choses maintenant :\n1. Appelle les services d'urgence locaux ou une ligne de crise.\n2. Écris ou appelle quelqu'un près de chez toi : \"Je ne suis pas en sécurité seul en ce moment, reste avec moi.\"\n3. Éloigne tout ce avec quoi tu pourrais te faire du mal.\n\nRéponds par un mot : es-tu seul(e) maintenant ?",
@@ -28,6 +30,11 @@
   "mood": {
     "question": "📊 Comment te sens-tu maintenant ?",
     "saved": "✅ Enregistré : {mood}\n\nMerci pour la note ! Le suivi de l'humeur aide à repérer les patterns.\n\nVeux-tu ajouter une note sur ce qui influence ton état ?",
+    "add_note_prompt": "Tu peux ajouter une courte note sur ce qui a influencé ton humeur aujourd'hui.",
+    "note_saved": "Ta note a été enregistrée.",
+    "buttons": {
+      "add_note": "Ajouter une note"
+    },
     "levels": {
       "5": "Excellent 😊",
       "4": "Bien 🙂",
@@ -38,7 +45,8 @@
   },
   "chat": {
     "prompt": "Je suis là. Raconte-moi ce qui te préoccupe. J'écoute et t'aide à comprendre.",
-    "error": "Désolé, une erreur s'est produite lors du traitement de ta demande. Réessaie plus tard ou demande de l'aide."
+    "error": "Désolé, une erreur s'est produite lors du traitement de ta demande. Réessaie plus tard ou demande de l'aide.",
+    "classifier_unavailable": "Je suis temporairement dans l'incapacité de traiter ton message en toute sécurité. Veuillez réessayer plus tard.\n\nSi tu penses être en danger immédiat ou ne pas pouvoir rester en sécurité, contacte les services d'urgence locaux ou une personne de confiance près de toi maintenant."
   },
   "safety_plan": {
     "title": "📋 Plan de sécurité",

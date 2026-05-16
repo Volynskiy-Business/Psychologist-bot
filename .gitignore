@@ -44,13 +44,11 @@ Thumbs.db
 
 # Data
 data/
+*.db
 
 # Logs
 *.log
 logs/
-
-# Alembic
-alembic.ini
 
 # Docker
 .dockerignore
@@ -59,3 +57,10 @@ alembic.ini
 *.pem
 *.key
 secrets/
+
+# Local agent/runtime artifacts
+.backup/
+.claude/
+.ai/
+_diagnostics/
+.venv.broken-*/
