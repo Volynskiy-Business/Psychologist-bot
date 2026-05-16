@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from typing import Union
 
 import httpx
 from aiogram import Router, types
@@ -206,6 +207,9 @@ async def handle_message(message: types.Message) -> None:
     try:
         result = None
         for model in [settings.default_model] + settings.fallback_models:
+            agent: Union[
+                FriendlyConversationAgent, AnxietySupportAgent, SupportPipeline
+            ]
             if user_mode == MODE_FRIENDLY_CHAT:
                 agent = FriendlyConversationAgent(client, model=model)
             elif user_mode == MODE_ANXIETY_SUPPORT:
