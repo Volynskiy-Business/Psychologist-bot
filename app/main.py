@@ -43,7 +43,7 @@ async def main() -> None:
     logger.info(
         "config: default_model=%s classifier_model=%s",
         settings.default_model,
-        settings.classifier_model or "(fallback to default_model)",
+        settings.classifier_model or "(disabled)",
     )
     await dp.start_polling(bot)
 

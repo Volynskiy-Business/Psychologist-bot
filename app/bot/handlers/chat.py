@@ -9,6 +9,7 @@ from aiogram.filters import Command
 
 from app.ai.openrouter_client import OpenRouterClient
 from app.ai.orchestration.pipeline import SupportPipeline
+from app.ai.routing.intake import detect_language
 from app.bot.handlers.i18n import get_text, get_user_language
 from app.bot.handlers.mood import consume_note_waiter, is_awaiting_note
 from app.config import settings
@@ -82,6 +83,7 @@ async def handle_message(message: types.Message) -> None:
 
     lang = get_user_language(message.from_user)
     user_text = message.text.strip()
+    msg_lang = detect_language(user_text)
 
     # Step 1: Deterministic crisis check (runs before consent — no external calls)
     risk_level, pattern = deterministic_crisis_check(user_text)
@@ -95,7 +97,20 @@ async def handle_message(message: types.Message) -> None:
             )
         except Exception:
             logger.exception("stage=crisis_record Failed to record safety event")
-        await message.answer(get_crisis_response(risk_level, lang))
+        await message.answer(get_crisis_response(risk_level, msg_lang))
+        return
+
+    # Step 1a: Passive-risk phrases — deterministic Tier 2 response, no LLM required
+    if risk_level == RiskLevel.ELEVATED_DISTRESS:
+        try:
+            await record_safety_event(
+                telegram_user_id=message.from_user.id,
+                risk_level=risk_level,
+                matched_pattern=pattern,
+            )
+        except Exception:
+            logger.exception("stage=crisis_record Failed to record passive-risk event")
+        await message.answer(get_crisis_response(RiskLevel.ELEVATED_DISTRESS, msg_lang))
         return
 
     # Step 1b: Consent gate — block LLM/classifier until user accepts terms
@@ -131,39 +146,55 @@ async def handle_message(message: types.Message) -> None:
         )
         return
 
-    # Step 2: LLM safety classification (for non-obvious cases)
+    # Step 2: LLM safety classification — only when CLASSIFIER_MODEL is explicitly configured
     client = OpenRouterClient()
-    classifier_model = settings.classifier_model or None
-    classifier = SafetyClassifier(client, model=classifier_model)
-
-    context_str = _build_context_str(message.from_user.id)
-    try:
-        classification = await classifier.classify(user_text, context=context_str)
-        if classification.risk_level >= RiskLevel.POSSIBLE_CRISIS:
-            await message.answer(get_crisis_response(classification.risk_level, lang))
+    if settings.classifier_model:
+        classifier = SafetyClassifier(
+            client, model=settings.classifier_model, fallback_models=settings.fallback_models
+        )
+        context_str = _build_context_str(message.from_user.id)
+        try:
+            classification = await classifier.classify(user_text, context=context_str)
+            if classification.risk_level >= RiskLevel.POSSIBLE_CRISIS:
+                await message.answer(get_crisis_response(classification.risk_level, msg_lang))
+                await client.close()
+                return
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 429:
+                logger.warning("stage=classifier status=429 rate_limited; failing closed")
+            else:
+                logger.exception("stage=classifier status=%d failing closed", exc.response.status_code)
+            await message.answer(get_text("chat.classifier_unavailable", lang), reply_markup=_back_to_menu_kb(lang))
             await client.close()
             return
-    except httpx.HTTPStatusError as exc:
-        if exc.response.status_code == 429:
-            logger.warning("stage=classifier status=429 rate_limited; failing closed")
-        else:
-            logger.exception("stage=classifier status=%d failing closed", exc.response.status_code)
-        await message.answer(get_text("chat.classifier_unavailable", lang), reply_markup=_back_to_menu_kb(lang))
-        await client.close()
-        return
-    except Exception:
-        logger.exception("stage=classifier exception; failing closed")
-        await message.answer(get_text("chat.classifier_unavailable", lang), reply_markup=_back_to_menu_kb(lang))
-        await client.close()
-        return
+        except Exception:
+            logger.exception("stage=classifier exception; failing closed")
+            await message.answer(get_text("chat.classifier_unavailable", lang), reply_markup=_back_to_menu_kb(lang))
+            await client.close()
+            return
 
-    # Step 3: Multi-agent support pipeline — keeps typing indicator alive throughout
+    # Step 3: Multi-agent support pipeline with model fallback
     history = _get_history(message.from_user.id)
-    pipeline = SupportPipeline(client, model=settings.default_model or None)
     typing_task = asyncio.create_task(_keep_typing(message))
     try:
-        result = await pipeline.run(user_text, lang, history)
-        if not result.is_safe:
+        result = None
+        for model in ([settings.default_model] + settings.fallback_models):
+            pipeline = SupportPipeline(client, model=model)
+            try:
+                result = await pipeline.run(user_text, msg_lang, history)
+                logger.debug("stage=support_generation model=%s status=success", model)
+                break
+            except httpx.HTTPStatusError as exc:
+                logger.warning(
+                    "stage=support_generation model=%s status=%d; trying next",
+                    model, exc.response.status_code,
+                )
+            except Exception:
+                logger.exception("stage=support_generation model=%s status=exception", model)
+                break
+        if result is None:
+            await message.answer(get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang))
+        elif not result.is_safe:
             logger.warning("stage=output_validation blocked reason=%s", result.block_reason)
             await message.answer(get_text("chat.output_blocked", lang), reply_markup=_back_to_menu_kb(lang))
         else:
