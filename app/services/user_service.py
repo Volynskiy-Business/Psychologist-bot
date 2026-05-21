@@ -76,6 +76,31 @@ async def has_consent(telegram_id: int) -> bool:
         return bool(result.scalar_one_or_none())
 
 
+async def get_user_by_telegram_id(telegram_id: int) -> Optional[User]:
+    """Return User ORM object or None.  Expunges from session so caller owns the object."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(User).where(User.telegram_id == telegram_id)
+        )
+        user = result.scalar_one_or_none()
+        if user is not None:
+            await session.refresh(user)
+        return user
+
+
+async def update_user_profile(telegram_id: int, **fields) -> None:
+    """Partial update of User row.  Only provided keyword-arg fields are changed."""
+    allowed = {"display_name", "gender", "consultant_gender", "onboarding_completed", "region"}
+    updates = {k: v for k, v in fields.items() if k in allowed}
+    if not updates:
+        return
+    async with AsyncSessionLocal() as session:
+        await session.execute(
+            update(User).where(User.telegram_id == telegram_id).values(**updates)
+        )
+        await session.commit()
+
+
 async def save_mood_entry(telegram_id: int, mood_score: int) -> None:
     async with AsyncSessionLocal() as session:
         user = await upsert_user(session, telegram_id=telegram_id)

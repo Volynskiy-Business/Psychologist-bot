@@ -43,6 +43,15 @@
   "settings": {
     "title": "⚙️ Настройки",
     "language": "🌐 Язык интерфейса",
+    "consultant_label": "👥 Твой консультант",
+    "user_gender_label": "👤 Твой пол",
+    "country_label": "🌎 Страна",
+    "gender_unknown": "Не указан",
+    "not_set": "Не указана",
+    "switch_to_male": "Сменить на мужчину",
+    "switch_to_female": "Сменить на женщину",
+    "edit_profile": "✏️ Изменить профиль",
+    "consultant_switched": "Готово! Консультант сменён.",
     "delete_data": "🗑 Удалить мои данные",
     "confirm_delete": "Да, удалить всё"
   },

@@ -31,6 +31,7 @@ class SupportPipeline:
         user_text: str,
         lang: str,
         history: list[dict[str, str]],
+        user_profile: Optional[dict] = None,
     ) -> PipelineResult:
         # Step 1: Deterministic intake classification
         intake = classify_intake(user_text, lang)
@@ -53,7 +54,7 @@ class SupportPipeline:
         )
 
         # Step 3: Build context-injected system prompt
-        system_prompt = build_support_prompt(intake, scenario, technique)
+        system_prompt = build_support_prompt(intake, scenario, technique, user_profile)
 
         # Step 4: LLM call with full conversation history
         messages: list[dict[str, str]] = (

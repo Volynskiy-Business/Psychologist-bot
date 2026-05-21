@@ -6,8 +6,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application
+# Copy application and translations
 COPY app/ ./app/
+COPY i18n/ ./i18n/
 
 # Create data directory
 RUN mkdir -p data

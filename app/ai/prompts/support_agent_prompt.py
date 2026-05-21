@@ -9,6 +9,88 @@ from typing import Optional
 
 from app.ai.orchestration.models import IntakeResult, ScenarioData, TechniqueData
 
+
+def build_personalization_section(profile: Optional[dict]) -> str:
+    """Build the ПЕРСОНАЛИЗАЦИЯ section injected into every agent's system prompt.
+
+    profile keys (all optional):
+      consultant_gender: 'male' | 'female' (default: 'female')
+      consultant_name:   str (the chosen consultant's name)
+      display_name:      str | None (user's name from onboarding)
+      gender:            'male' | 'female' | 'other' | 'unknown' | None
+      region:            str | None (country)
+    """
+    if not profile:
+        return ""
+
+    lines = ["\n━━━ ПЕРСОНАЛИЗАЦИЯ ━━━"]
+
+    # Consultant persona
+    c_gender = profile.get("consultant_gender", "female")
+    c_name = profile.get("consultant_name", "Мария" if c_gender != "male" else "Максим")
+    if c_gender == "male":
+        lines.append(
+            f"Ты — {c_name}. Говори строго от МУЖСКОГО лица: "
+            "используй мужские окончания глаголов и кратких прилагательных "
+            "('я рад', 'я заметил', 'я понял', 'я готов', 'согласен'). "
+            "Никогда не используй женские формы для себя."
+        )
+    else:
+        lines.append(
+            f"Ты — {c_name}. Говори строго от ЖЕНСКОГО лица: "
+            "используй женские окончания глаголов и кратких прилагательных "
+            "('я рада', 'я заметила', 'я поняла', 'я готова', 'согласна'). "
+            "Никогда не используй мужские формы для себя."
+        )
+
+    # User's name
+    user_name = profile.get("display_name")
+    if user_name:
+        lines.append(
+            f"Имя пользователя: {user_name}. "
+            "Обращайся по имени 1–2 раза за разговор, ненавязчиво."
+        )
+
+    # User's gender → address forms
+    u_gender = profile.get("gender")
+    if u_gender == "male":
+        lines.append(
+            "Пользователь — МУЖЧИНА. Обращайся строго в мужском роде: 'ты устал', "
+            "'ты чувствовал', 'ты сделал', 'ты сказал', 'ты заметил'."
+        )
+    elif u_gender == "female":
+        lines.append(
+            "Пользователь — ЖЕНЩИНА. Обращайся строго в женском роде: 'ты устала', "
+            "'ты чувствовала', 'ты сделала', 'ты сказала', 'ты заметила'."
+        )
+    else:
+        # Gender unknown — explicitly forbid defaulting to female
+        lines.append(
+            "Пол пользователя НЕИЗВЕСТЕН. "
+            "Строго запрещено использовать женские формы глаголов и прилагательных "
+            "('устала', 'заметила', 'почувствовала', 'сказала') когда речь идёт о пользователе. "
+            "Используй мужской род как нейтральный в русском языке, "
+            "либо переформулируй фразу чтобы избежать гендерных окончаний "
+            "(например 'тебе было тяжело' вместо 'ты устал/а')."
+        )
+
+    # Country context
+    country = profile.get("region")
+    if country:
+        # List of CIS-specific markers to suppress for non-CIS countries
+        cis_countries = {"россия", "украина", "беларусь", "казахстан", "молдова",
+                         "армения", "азербайджан", "грузия", "узбекистан", "таджикистан"}
+        is_cis = country.lower() in cis_countries
+        lines.append(f"Страна проживания пользователя: {country}.")
+        if not is_cis:
+            lines.append(
+                "НЕ упоминай: российские/СНГ телефонные линии, службы России/Украины/Беларуси, "
+                "цены в рублях, ссылки на ресурсы СНГ. "
+                "Адаптируй культурный контекст, примеры и упоминаемые службы к стране проживания пользователя."
+            )
+
+    return "\n".join(lines)
+
 _BASE = """Ты — тёплый и внимательный ИИ-помощник для эмоциональной поддержки и психологической самопомощи.
 
 Ты не врач, не психотерапевт и не кризисная служба. Ты не замена живой помощи.
@@ -74,9 +156,16 @@ def build_support_prompt(
     intake: IntakeResult,
     scenario: Optional[ScenarioData],
     technique: Optional[TechniqueData],
+    user_profile: Optional[dict] = None,
 ) -> str:
     """Build a focused system prompt injected with scenario and technique context."""
     parts = [_BASE]
+
+    # Inject personalization block (consultant persona, user gender/name/country)
+    personalization = build_personalization_section(user_profile)
+    if personalization:
+        parts.append(personalization)
+
     parts.append(
         f"\nЯЗЫК ТЕКУЩЕГО ОТВЕТА: «{intake.language}». Используй ТОЛЬКО этот язык."
     )

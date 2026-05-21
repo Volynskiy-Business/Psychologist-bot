@@ -43,6 +43,15 @@
   "settings": {
     "title": "⚙️ Settings",
     "language": "🌐 Interface language",
+    "consultant_label": "👥 Your consultant",
+    "user_gender_label": "👤 Your gender",
+    "country_label": "🌎 Country",
+    "gender_unknown": "Not specified",
+    "not_set": "Not set",
+    "switch_to_male": "Switch to male consultant",
+    "switch_to_female": "Switch to female consultant",
+    "edit_profile": "✏️ Edit profile",
+    "consultant_switched": "Done! Consultant changed.",
     "delete_data": "🗑 Delete my data",
     "confirm_delete": "Yes, delete everything"
   },

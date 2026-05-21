@@ -17,6 +17,8 @@ services:
         condition: service_started
     volumes:
       - ./data:/app/data
+      - ./alembic.ini:/app/alembic.ini
+      - ./alembic:/app/alembic
     ports:
       - "8000:8000"  # Prometheus metrics
     logging:

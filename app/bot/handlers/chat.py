@@ -13,6 +13,7 @@ from aiogram.filters import Command
 from app.ai import tracing
 from app.ai.agents.anxiety_support import AnxietySupportAgent
 from app.ai.agents.friendly_conversation import FriendlyConversationAgent
+from app.ai.agents.onboarding_agent import OnboardingAgent, get_consultant_names
 from app.ai.agents.sadness_support import SadnessSupportAgent
 from app.ai.openrouter_client import OpenRouterClient
 from app.ai.orchestration.pipeline import SupportPipeline
@@ -22,16 +23,19 @@ from app.bot.user_state import (
     MODE_ANXIETY_SUPPORT,
     MODE_FRIENDLY_CHAT,
     MODE_SADNESS_SUPPORT,
+    clear_onboarding_step,
     clear_safety_section,
     get_mode,
+    get_onboarding_step,
     get_safety_section,
+    set_onboarding_step,
 )
 from app.bot.handlers.feedback import feedback_keyboard
 from app.bot.handlers.mood import consume_note_waiter, is_awaiting_note, send_mood_summary
 from app.bot.handlers.safety_plan import send_section_view
 from app.config import settings
 from app.services.safety_plan_service import add_item as add_safety_plan_item
-from app.services.user_service import has_consent, record_safety_event, save_mood_note
+from app.services.user_service import get_user_by_telegram_id, has_consent, record_safety_event, save_mood_note, update_user_profile
 from app.db.models import RiskLevel
 from app.safety.crisis_detector import deterministic_crisis_check
 from app.safety.safety_classifier import SafetyClassifier
@@ -175,6 +179,93 @@ async def handle_message(message: types.Message) -> None:
         )
         return
 
+    # Step 1c: Onboarding interception — handle free-text answers for onboarding steps
+    onboarding_step = get_onboarding_step(message.from_user.id)
+    if onboarding_step == 0:
+        # In-memory step may be lost after bot restart — check DB
+        _ob_user = await get_user_by_telegram_id(message.from_user.id)
+        if _ob_user is not None and not _ob_user.onboarding_completed:
+            from app.bot.handlers.start import _launch_onboarding
+            await _launch_onboarding(message.from_user.id, lang, message)
+            return
+    if onboarding_step > 0:
+        client = OpenRouterClient()
+        try:
+            db_user = await get_user_by_telegram_id(message.from_user.id)
+            c_gender = getattr(db_user, "consultant_gender", "female") if db_user else "female"
+            country_hint = getattr(db_user, "region", None) if db_user else None
+            female_name, male_name = get_consultant_names(country_hint, lang)
+            agent = OnboardingAgent(client, model=settings.default_model)
+
+            if onboarding_step == 1:
+                # Extract name, gender, country from user's first answer
+                extracted = await agent.extract_profile(user_text, female_name, male_name)
+                updates: dict = {}
+                if extracted.get("name"):
+                    updates["display_name"] = extracted["name"]
+                if extracted.get("gender") not in (None, "unknown"):
+                    updates["gender"] = extracted["gender"]
+                if extracted.get("country"):
+                    updates["region"] = extracted["country"]
+                    # Refresh names based on detected country
+                    female_name, male_name = get_consultant_names(extracted["country"], lang)
+                if updates:
+                    await update_user_profile(message.from_user.id, **updates)
+                # Also check if consultant_gender slipped in (unlikely but possible)
+                if extracted.get("consultant_gender") not in (None, "unknown"):
+                    await update_user_profile(
+                        message.from_user.id,
+                        consultant_gender=extracted["consultant_gender"],
+                    )
+                    c_gender = extracted["consultant_gender"]
+                # Move to step 2
+                set_onboarding_step(message.from_user.id, 2)
+                step2_msg = await agent.step2_message(
+                    lang, female_name, male_name, c_gender,
+                    user_name=extracted.get("name"),
+                )
+                await message.answer(step2_msg)
+
+            elif onboarding_step == 2:
+                # Extract consultant gender preference
+                extracted = await agent.extract_profile(user_text, female_name, male_name)
+                c_pref = extracted.get("consultant_gender")
+                if c_pref and c_pref not in ("unknown",):
+                    await update_user_profile(
+                        message.from_user.id, consultant_gender=c_pref
+                    )
+                    c_gender = c_pref
+                # Re-load display_name for closing message
+                db_user2 = await get_user_by_telegram_id(message.from_user.id)
+                consultant_name = (
+                    male_name if c_gender == "male" else female_name
+                )
+                user_name = getattr(db_user2, "display_name", None) if db_user2 else None
+                # Mark onboarding complete
+                await update_user_profile(
+                    message.from_user.id, onboarding_completed=True
+                )
+                clear_onboarding_step(message.from_user.id)
+                done_msg = await agent.done_message(lang, consultant_name, user_name)
+                from app.bot.handlers.start import main_menu_keyboard
+                await message.answer(done_msg)
+                await message.answer(
+                    get_text("start.thanks", lang),
+                    reply_markup=main_menu_keyboard(lang),
+                )
+        except Exception:
+            logger.exception("Onboarding step %d failed", onboarding_step)
+            clear_onboarding_step(message.from_user.id)
+            # Do NOT mark onboarding_completed=True here — let the user retry via /start
+            from app.bot.handlers.start import main_menu_keyboard
+            await message.answer(
+                get_text("chat.error", lang),
+                reply_markup=main_menu_keyboard(lang),
+            )
+        finally:
+            await client.close()
+        return
+
     # Step 1c: Mood note interception — save free text as a note, skip LLM
     if is_awaiting_note(message.from_user.id):
         consume_note_waiter(message.from_user.id)
@@ -247,6 +338,22 @@ async def handle_message(message: types.Message) -> None:
         if quick.detected_emotion in ("sadness", "grief"):
             user_mode = MODE_SADNESS_SUPPORT
 
+    # Load user profile for personalization
+    db_user = await get_user_by_telegram_id(message.from_user.id)
+    user_profile: dict | None = None
+    if db_user:
+        country = getattr(db_user, "region", None)
+        c_gender = getattr(db_user, "consultant_gender", "female")
+        female_name, male_name = get_consultant_names(country, lang)
+        consultant_name = male_name if c_gender == "male" else female_name
+        user_profile = {
+            "consultant_gender": c_gender,
+            "consultant_name": consultant_name,
+            "display_name": getattr(db_user, "display_name", None),
+            "gender": getattr(db_user, "gender", None),
+            "region": country,
+        }
+
     history = _get_history(message.from_user.id)
     # Only compute HMAC IDs when Langfuse is active; avoids work and salt access otherwise.
     _enabled = tracing.is_enabled()
@@ -271,7 +378,7 @@ async def handle_message(message: types.Message) -> None:
                 else:
                     agent = SupportPipeline(client, model=model)
                 try:
-                    result = await agent.run(user_text, msg_lang, history)
+                    result = await agent.run(user_text, msg_lang, history, user_profile)
                     logger.debug("stage=support_generation model=%s status=success", model)
                     break
                 except httpx.HTTPStatusError as exc:

@@ -1,24 +1,32 @@
-"""Start handler with consent flow and main menu callbacks."""
+"""Start handler with consent flow, onboarding, and main menu callbacks."""
 
 import logging
 
 from aiogram import Router, types
 from aiogram.filters import Command
 
+from app.ai.agents.onboarding_agent import OnboardingAgent, get_consultant_names
+from app.ai.openrouter_client import OpenRouterClient
 from app.bot.handlers.i18n import get_text, get_user_language
 from app.bot.user_state import (
     MODE_ANXIETY_SUPPORT,
     MODE_FRIENDLY_CHAT,
     MODE_SADNESS_SUPPORT,
     clear_mode,
+    clear_onboarding_step,
     clear_safety_section,
+    get_onboarding_step,
     set_mode,
+    set_onboarding_step,
 )
+from app.config import settings
 from app.services.user_service import (
     DeleteUserDataResult,
     delete_user_data,
+    get_user_by_telegram_id,
     grant_consent,
     has_consent,
+    update_user_profile,
 )
 
 logger = logging.getLogger(__name__)
@@ -123,12 +131,40 @@ def main_menu_keyboard(lang: str = "en") -> types.InlineKeyboardMarkup:
 async def cmd_start(message: types.Message) -> None:
     lang = get_user_language(message.from_user)
     if await has_consent(message.from_user.id):
-        await message.answer(
-            get_text("start.thanks", lang), reply_markup=main_menu_keyboard(lang)
-        )
+        user = await get_user_by_telegram_id(message.from_user.id)
+        if user and user.onboarding_completed:
+            await message.answer(
+                get_text("start.thanks", lang), reply_markup=main_menu_keyboard(lang)
+            )
+        else:
+            # Consent given but onboarding not done — restart onboarding
+            await _launch_onboarding(message.from_user.id, lang, message)
         return
     text, keyboard = _start_content(lang)
     await message.answer(text, reply_markup=keyboard)
+
+
+async def _launch_onboarding(
+    telegram_id: int,
+    lang: str,
+    message: types.Message,
+) -> None:
+    """Start onboarding: send first warm greeting and set step=1."""
+    client = OpenRouterClient()
+    try:
+        female_name, male_name = get_consultant_names(None, lang)
+        agent = OnboardingAgent(client, model=settings.default_model)
+        greeting = await agent.start_message(lang, female_name, male_name, "female")
+        set_onboarding_step(telegram_id, 1)
+        await message.answer(greeting)
+    except Exception:
+        logger.exception("_launch_onboarding failed; skipping to main menu")
+        set_onboarding_step(telegram_id, 0)
+        await message.answer(
+            get_text("start.thanks", lang), reply_markup=main_menu_keyboard(lang)
+        )
+    finally:
+        await client.close()
 
 
 # ── Consent screen callbacks ──────────────────────────────────────────────────
@@ -143,11 +179,26 @@ async def on_consent_agree(callback: types.CallbackQuery) -> None:
         first_name=callback.from_user.first_name,
         language=lang,
     )
-    await callback.message.edit_text(
-        get_text("start.thanks", lang),
-        reply_markup=main_menu_keyboard(lang),
-    )
     await callback.answer()
+
+    # Launch onboarding conversation
+    client = OpenRouterClient()
+    try:
+        female_name, male_name = get_consultant_names(None, lang)
+        agent = OnboardingAgent(client, model=settings.default_model)
+        greeting = await agent.start_message(lang, female_name, male_name, "female")
+        set_onboarding_step(callback.from_user.id, 1)
+        # Edit the consent message away and send the onboarding greeting
+        await callback.message.edit_text(greeting)
+    except Exception:
+        logger.exception("on_consent_agree onboarding failed; skipping to main menu")
+        set_onboarding_step(callback.from_user.id, 0)
+        await callback.message.edit_text(
+            get_text("start.thanks", lang),
+            reply_markup=main_menu_keyboard(lang),
+        )
+    finally:
+        await client.close()
 
 
 @router.callback_query(lambda c: c.data == "crisis_help")
@@ -204,6 +255,7 @@ async def on_back_to_menu(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
     clear_mode(callback.from_user.id)
     clear_safety_section(callback.from_user.id)
+    clear_onboarding_step(callback.from_user.id)
     await callback.message.edit_text(
         get_text("start.thanks", lang),
         reply_markup=main_menu_keyboard(lang),
@@ -308,38 +360,115 @@ _LANG_DISPLAY = {
     "es": "Español 🇪🇸",
 }
 
+_GENDER_DISPLAY = {
+    "male": "Мужской 👨",
+    "female": "Женский 👩",
+    "other": "Другой 👤",
+}
+
 
 @router.callback_query(lambda c: c.data == "settings")
 async def on_settings(callback: types.CallbackQuery) -> None:
     lang = get_user_language(callback.from_user)
+    user = await get_user_by_telegram_id(callback.from_user.id)
+
     lang_name = _LANG_DISPLAY.get(lang, "English 🇬🇧")
-    text = (
-        get_text("settings.title", lang)
-        + "\n\n"
-        + get_text("settings.language", lang)
-        + ": "
-        + lang_name
-    )
+
+    # Build profile display
+    if user:
+        c_gender = getattr(user, "consultant_gender", "female")
+        female_name, male_name = get_consultant_names(
+            getattr(user, "region", None), lang
+        )
+        consultant_display = (
+            f"{male_name} 👨‍⚕️" if c_gender == "male" else f"{female_name} 👩‍⚕️"
+        )
+        u_gender_display = _GENDER_DISPLAY.get(
+            getattr(user, "gender", None) or "", get_text("settings.gender_unknown", lang)
+        )
+        country_display = getattr(user, "region", None) or get_text("settings.not_set", lang)
+
+        text = (
+            f"{get_text('settings.title', lang)}\n\n"
+            f"🌐 {get_text('settings.language', lang)}: {lang_name}\n"
+            f"👥 {get_text('settings.consultant_label', lang)}: {consultant_display}\n"
+            f"👤 {get_text('settings.user_gender_label', lang)}: {u_gender_display}\n"
+            f"🌎 {get_text('settings.country_label', lang)}: {country_display}"
+        )
+
+        # Toggle button: show the OTHER consultant option
+        if c_gender == "male":
+            toggle_text = f"🔄 {get_text('settings.switch_to_female', lang)} ({female_name} 👩‍⚕️)"
+            toggle_cb = "consultant_switch_female"
+        else:
+            toggle_text = f"🔄 {get_text('settings.switch_to_male', lang)} ({male_name} 👨‍⚕️)"
+            toggle_cb = "consultant_switch_male"
+    else:
+        text = f"{get_text('settings.title', lang)}\n\n🌐 {get_text('settings.language', lang)}: {lang_name}"
+        toggle_text = ""
+        toggle_cb = ""
+
+    keyboard_rows = []
+    if toggle_text:
+        keyboard_rows.append([
+            types.InlineKeyboardButton(text=toggle_text, callback_data=toggle_cb)
+        ])
+    keyboard_rows.append([
+        types.InlineKeyboardButton(
+            text=get_text("settings.edit_profile", lang),
+            callback_data="redo_onboarding",
+        )
+    ])
+    keyboard_rows.append([
+        types.InlineKeyboardButton(
+            text=get_text("settings.delete_data", lang),
+            callback_data="delete_my_data",
+        )
+    ])
+    keyboard_rows.append([
+        types.InlineKeyboardButton(
+            text=get_text("menu.back_to_menu", lang),
+            callback_data="back_to_menu",
+        )
+    ])
+
     await callback.message.edit_text(
         text,
-        reply_markup=types.InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    types.InlineKeyboardButton(
-                        text=get_text("settings.delete_data", lang),
-                        callback_data="delete_my_data",
-                    )
-                ],
-                [
-                    types.InlineKeyboardButton(
-                        text=get_text("menu.back_to_menu", lang),
-                        callback_data="back_to_menu",
-                    )
-                ],
-            ]
-        ),
+        reply_markup=types.InlineKeyboardMarkup(inline_keyboard=keyboard_rows),
     )
     await callback.answer()
+
+
+@router.callback_query(lambda c: c.data in ("consultant_switch_male", "consultant_switch_female"))
+async def on_consultant_switch(callback: types.CallbackQuery) -> None:
+    lang = get_user_language(callback.from_user)
+    new_gender = "male" if callback.data == "consultant_switch_male" else "female"
+    await update_user_profile(callback.from_user.id, consultant_gender=new_gender)
+    await callback.answer(get_text("settings.consultant_switched", lang))
+    # Refresh the settings screen
+    await on_settings(callback)
+
+
+@router.callback_query(lambda c: c.data == "redo_onboarding")
+async def on_redo_onboarding(callback: types.CallbackQuery) -> None:
+    lang = get_user_language(callback.from_user)
+    await update_user_profile(callback.from_user.id, onboarding_completed=False)
+    await callback.answer()
+    client = OpenRouterClient()
+    try:
+        female_name, male_name = get_consultant_names(None, lang)
+        agent = OnboardingAgent(client, model=settings.default_model)
+        greeting = await agent.start_message(lang, female_name, male_name, "female")
+        set_onboarding_step(callback.from_user.id, 1)
+        await callback.message.edit_text(greeting)
+    except Exception:
+        logger.exception("on_redo_onboarding failed")
+        await callback.message.edit_text(
+            get_text("start.thanks", lang),
+            reply_markup=main_menu_keyboard(lang),
+        )
+    finally:
+        await client.close()
 
 
 @router.callback_query(lambda c: c.data == "delete_my_data")
@@ -384,6 +513,7 @@ async def on_delete_confirmed(callback: types.CallbackQuery) -> None:
     if result == DeleteUserDataResult.NOT_FOUND:
         text = get_text("privacy.not_found", lang)
     else:
+        clear_onboarding_step(callback.from_user.id)
         text = get_text("privacy.deleted", lang)
 
     await callback.message.edit_text(text, reply_markup=_back_to_menu_keyboard(lang))

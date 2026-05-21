@@ -39,6 +39,10 @@ class User(Base):
     language: Mapped[str] = mapped_column(String(10), default="ru")
     region: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     style_preference: Mapped[str] = mapped_column(String(32), default="soft")
+    display_name: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)  # name from onboarding
+    gender: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)          # male / female / other
+    consultant_gender: Mapped[str] = mapped_column(String(32), default="female")      # male / female
+    onboarding_completed: Mapped[bool] = mapped_column(default=False)
     consent_given: Mapped[bool] = mapped_column(default=False)
     consent_accepted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime, nullable=True

@@ -21,6 +21,7 @@ from app.ai.openrouter_client import OpenRouterClient
 from app.ai.orchestration.models import PipelineResult, RiskTier
 from app.ai.output_validation import validate_support_response
 from app.ai.prompts.humanization_prompt import build_humanization_prompt
+from app.ai.prompts.support_agent_prompt import build_personalization_section
 from app.ai.response_quality import check_response_quality
 from app.knowledge.sadness_support import SadnessScenario
 from app.knowledge.vector_store import sadness_store
@@ -117,10 +118,14 @@ class SadnessSupportAgent:
         user_text: str,
         lang: str,
         history: list[dict[str, str]],
+        user_profile: Optional[dict] = None,
     ) -> PipelineResult:
         logger.debug("stage=sadness_support lang=%s", lang)
 
         system_prompt = self.build_prompt(user_text, lang)
+        personalization = build_personalization_section(user_profile)
+        if personalization:
+            system_prompt = system_prompt + personalization
         messages: list[dict[str, str]] = (
             [{"role": "system", "content": system_prompt}]
             + history

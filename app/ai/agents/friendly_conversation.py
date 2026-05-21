@@ -17,6 +17,7 @@ from app.ai.openrouter_client import OpenRouterClient
 from app.ai.orchestration.models import PipelineResult, RiskTier
 from app.ai.output_validation import validate_support_response
 from app.ai.prompts.humanization_prompt import build_humanization_prompt
+from app.ai.prompts.support_agent_prompt import build_personalization_section
 from app.ai.response_quality import check_response_quality
 
 logger = logging.getLogger(__name__)
@@ -127,10 +128,14 @@ class FriendlyConversationAgent:
         user_text: str,
         lang: str,
         history: list[dict[str, str]],
+        user_profile: Optional[dict] = None,
     ) -> PipelineResult:
         logger.debug("stage=friendly_conv lang=%s", lang)
 
         system_prompt = self.build_prompt(lang)
+        personalization = build_personalization_section(user_profile)
+        if personalization:
+            system_prompt = system_prompt + personalization
         messages: list[dict[str, str]] = (
             [{"role": "system", "content": system_prompt}]
             + history
