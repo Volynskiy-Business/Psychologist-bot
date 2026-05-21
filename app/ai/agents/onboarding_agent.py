@@ -17,6 +17,9 @@ import re
 from typing import Optional
 
 from app.ai.openrouter_client import OpenRouterClient
+from app.ai.orchestration.models import RiskTier
+from app.ai.prompts.humanization_prompt import build_humanization_prompt
+from app.ai.response_quality import check_response_quality
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +161,25 @@ class OnboardingAgent:
         self.client = client
         self.model = model
 
+    async def _maybe_humanize(self, draft: str, lang: str) -> str:
+        """Run quality check; if needed, rewrite draft through humanizer."""
+        quality = check_response_quality(draft, RiskTier.TIER_1)
+        if not quality.should_rewrite:
+            return draft
+        logger.info("stage=onboarding_humanize issues=%s", quality.issues())
+        try:
+            humanization_prompt = build_humanization_prompt(draft, "", lang)
+            rewrite = await self.client.chat_completion(
+                messages=[{"role": "user", "content": humanization_prompt}],
+                model=self.model,
+                temperature=0.3,
+                max_tokens=300,
+            )
+            return rewrite.content.strip()
+        except Exception:
+            logger.exception("stage=onboarding_humanize failed; using original draft")
+            return draft
+
     async def start_message(
         self,
         lang: str,
@@ -186,7 +208,7 @@ class OnboardingAgent:
             temperature=0.6,
             max_tokens=200,
         )
-        return response.content.strip()
+        return await self._maybe_humanize(response.content.strip(), lang)
 
     async def step2_message(
         self,
@@ -226,7 +248,7 @@ class OnboardingAgent:
             temperature=0.6,
             max_tokens=150,
         )
-        return response.content.strip()
+        return await self._maybe_humanize(response.content.strip(), lang)
 
     async def done_message(
         self,
@@ -250,7 +272,7 @@ class OnboardingAgent:
             temperature=0.6,
             max_tokens=100,
         )
-        return response.content.strip()
+        return await self._maybe_humanize(response.content.strip(), lang)
 
     async def extract_profile(
         self,
