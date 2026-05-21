@@ -78,8 +78,18 @@ def get_consultant_names(country: Optional[str], lang: str = "ru") -> tuple[str,
 
 # ── Prompt templates ──────────────────────────────────────────────────────────
 
+_GENDER_FEMALE = (
+    "Ты говоришь строго от ЖЕНСКОГО лица. "
+    "Используй только женские формы: «я рада», «я познакомилась», «я подумала», «я готова», «я хотела»."
+)
+_GENDER_MALE = (
+    "Ты говоришь строго от МУЖСКОГО лица. "
+    "Используй только мужские формы: «я рад», «я познакомился», «я подумал», «я готов», «я хотел»."
+)
+
 _STEP1_SYSTEM = """Ты — {consultant_name}, психолог-консультант. Твой коллега — {colleague_name}.
-Ты только что познакомился(-ась) с новым пользователем — он принял условия использования и теперь ты хочешь узнать его немного получше.
+{gender_instruction}
+Ты только что встретил(-а) нового пользователя — он принял условия использования и теперь ты хочешь узнать его немного получше.
 
 Напиши короткое тёплое приветствие от своего имени.
 В нём мягко и нативно спроси пользователя:
@@ -95,6 +105,7 @@ _STEP1_SYSTEM = """Ты — {consultant_name}, психолог-консульт
 - Язык: {lang}."""
 
 _STEP2_SYSTEM = """Ты — {consultant_name}, психолог-консультант.
+{gender_instruction}
 Ты уже познакомился(-ась) с пользователем и знаешь его немного.
 Теперь тебе нужно мягко узнать, с кем пользователю будет комфортнее общаться — с тобой ({consultant_name}) или с твоим коллегой ({colleague_name}).
 
@@ -103,6 +114,7 @@ _STEP2_SYSTEM = """Ты — {consultant_name}, психолог-консульт
 Никакого Markdown. 1–2 предложения. Язык: {lang}."""
 
 _STEP2_WITH_NAME_SYSTEM = """Ты — {consultant_name}, психолог-консультант.
+{gender_instruction}
 Ты уже познакомился(-ась) с пользователем по имени {user_name}.
 Теперь нужно мягко узнать, с кем {user_name} будет комфортнее общаться — с тобой ({consultant_name}) или с твоим коллегой ({colleague_name}).
 
@@ -110,6 +122,7 @@ _STEP2_WITH_NAME_SYSTEM = """Ты — {consultant_name}, психолог-кон
 Никакого Markdown. 1–2 предложения. Язык: {lang}."""
 
 _DONE_SYSTEM = """Ты — {consultant_name}, психолог-консультант.
+{gender_instruction}
 Пользователь только что завершил краткое знакомство. Напиши одну тёплую фразу (без вопросов),
 которая даёт понять что ты рад(-а) знакомству и готов(-а) общаться.
 Если знаешь имя пользователя — обратись по имени. Не спрашивай ни о чём — только тёплое завершение знакомства.
@@ -155,12 +168,15 @@ class OnboardingAgent:
         """Generate the first warm greeting message (Step 1)."""
         if consultant_gender == "male":
             consultant_name, colleague_name = male_name, female_name
+            gender_instruction = _GENDER_MALE
         else:
             consultant_name, colleague_name = female_name, male_name
+            gender_instruction = _GENDER_FEMALE
 
         system = _STEP1_SYSTEM.format(
             consultant_name=consultant_name,
             colleague_name=colleague_name,
+            gender_instruction=gender_instruction,
             lang=lang,
         )
         response = await self.client.chat_completion(
@@ -183,20 +199,24 @@ class OnboardingAgent:
         """Generate the second question about consultant gender preference."""
         if consultant_gender == "male":
             consultant_name, colleague_name = male_name, female_name
+            gender_instruction = _GENDER_MALE
         else:
             consultant_name, colleague_name = female_name, male_name
+            gender_instruction = _GENDER_FEMALE
 
         if user_name:
             system = _STEP2_WITH_NAME_SYSTEM.format(
                 consultant_name=consultant_name,
                 colleague_name=colleague_name,
                 user_name=user_name,
+                gender_instruction=gender_instruction,
                 lang=lang,
             )
         else:
             system = _STEP2_SYSTEM.format(
                 consultant_name=consultant_name,
                 colleague_name=colleague_name,
+                gender_instruction=gender_instruction,
                 lang=lang,
             )
         response = await self.client.chat_completion(
@@ -212,11 +232,14 @@ class OnboardingAgent:
         self,
         lang: str,
         consultant_name: str,
+        consultant_gender: str,
         user_name: Optional[str],
     ) -> str:
         """Generate a warm closing line after onboarding is complete."""
+        gender_instruction = _GENDER_MALE if consultant_gender == "male" else _GENDER_FEMALE
         system = _DONE_SYSTEM.format(
             consultant_name=consultant_name,
+            gender_instruction=gender_instruction,
             user_name=user_name or "",
             lang=lang,
         )

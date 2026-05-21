@@ -246,7 +246,7 @@ async def handle_message(message: types.Message) -> None:
                     message.from_user.id, onboarding_completed=True
                 )
                 clear_onboarding_step(message.from_user.id)
-                done_msg = await agent.done_message(lang, consultant_name, user_name)
+                done_msg = await agent.done_message(lang, consultant_name, c_gender, user_name)
                 from app.bot.handlers.start import main_menu_keyboard
                 await message.answer(done_msg)
                 await message.answer(
