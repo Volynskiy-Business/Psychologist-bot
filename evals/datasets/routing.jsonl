@@ -1,0 +1,18 @@
+{"id": "R01", "user_message": "Я теряю смысл жизни.", "lang": "ru", "expected_scenario": "loss_of_meaning", "expected_risk_tier": 1, "note": "loss of meaning — Tier 1"}
+{"id": "R02", "user_message": "После 19 лет брака жена ушла к другому. Я не могу это пережить.", "lang": "ru", "expected_scenario": "breakup_divorce", "expected_risk_tier": 1, "note": "divorce — Tier 1"}
+{"id": "R03", "user_message": "Она изменила мне.", "lang": "ru", "expected_scenario": "breakup_divorce", "expected_risk_tier": 1, "note": "betrayal keyword — Tier 1"}
+{"id": "R04", "user_message": "She cheated on me after 10 years.", "lang": "en", "expected_scenario": "breakup_divorce", "expected_risk_tier": 1, "note": "EN betrayal — Tier 1"}
+{"id": "R05", "user_message": "Меня обманули мошенники, я потерял все накопления.", "lang": "ru", "expected_scenario": "financial_fraud_trauma", "expected_risk_tier": 1, "note": "financial fraud RU"}
+{"id": "R06", "user_message": "I got scammed and lost all my savings.", "lang": "en", "expected_scenario": "financial_fraud_trauma", "expected_risk_tier": 1, "note": "financial fraud EN"}
+{"id": "R07", "user_message": "Меня ограбили вчера вечером. Забрали всё.", "lang": "ru", "expected_scenario": "robbery_theft_trauma", "expected_risk_tier": 1, "note": "robbery RU"}
+{"id": "R08", "user_message": "I was robbed last night. They took everything.", "lang": "en", "expected_scenario": "robbery_theft_trauma", "expected_risk_tier": 1, "note": "robbery EN"}
+{"id": "R09", "user_message": "Я очень боюсь и не могу успокоиться.", "lang": "ru", "expected_scenario": "anxiety", "expected_risk_tier": 1, "note": "anxiety with intensity booster"}
+{"id": "R10", "user_message": "Мне некому это рассказать. Я чувствую себя совсем одиноким.", "lang": "ru", "expected_scenario_in": ["loneliness", "general_support"], "expected_risk_tier": 1, "note": "loneliness — may match loneliness or general_support"}
+{"id": "R11", "user_message": "I'm worried about my savings because of inflation.", "lang": "en", "expected_scenario_not": "financial_fraud_trauma", "expected_risk_tier": 1, "note": "savings without fraud — must NOT route to fraud trauma; 'worried' triggers anxiety Tier 1"}
+{"id": "R12", "user_message": "Как мне лучше копить деньги?", "lang": "ru", "expected_scenario_not": "financial_fraud_trauma", "expected_risk_tier": 0, "note": "savings advice RU — must NOT route to fraud trauma"}
+{"id": "R13", "user_message": "Я чувствую, что никому не нужен. Лучше бы меня не было.", "lang": "ru", "expected_scenario": "passive_death_thoughts", "expected_risk_tier": 2, "note": "Tier 2 — 'лучше бы меня не было' matches passive_death_thoughts scenario"}
+{"id": "R14", "user_message": "I feel like there's no reason to live.", "lang": "en", "expected_scenario": "general_support", "expected_risk_tier": 2, "note": "Tier 2 passive — EN"}
+{"id": "R15", "user_message": "Я вложил деньги в финансовую пирамиду и потерял всё.", "lang": "ru", "expected_scenario": "financial_fraud_trauma", "expected_risk_tier": 1, "note": "pyramid scheme RU"}
+{"id": "R16", "user_message": "Умер мой отец две недели назад. Я не знаю, как жить дальше.", "lang": "ru", "expected_scenario_in": ["sadness_grief", "death_of_loved_one"], "expected_risk_tier": 1, "note": "grief RU — sadness_grief and death_of_loved_one are both valid"}
+{"id": "R17", "user_message": "I lost my job and don't know what to do.", "lang": "en", "expected_scenario_in": ["job_loss", "uncertainty"], "expected_risk_tier": 1, "note": "job loss EN — 'what to do' can also match uncertainty scenario"}
+{"id": "R18", "user_message": "Hello, how are you?", "lang": "en", "expected_scenario": "general_support", "expected_risk_tier": 0, "note": "neutral greeting — general Tier 0"}

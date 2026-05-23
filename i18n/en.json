@@ -1,7 +1,7 @@
 {
   "bot_name": "PsySupport AI",
   "start": {
-    "greeting": "Hello. I'm {bot_name} — an AI assistant for psychological self-help and emotional support.",
+    "greeting": "Hello. I'm {bot_name} — an AI assistant for emotional support and gentle self-help.",
     "capabilities": "I can help you:\n— understand emotions and thoughts\n— reduce stress\n— do CBT/DBT/mindfulness exercises\n— keep a mood diary\n— make a small action plan",
     "disclaimer": "I am not a doctor, not a psychotherapist and not a crisis service. I do not diagnose or prescribe treatment.",
     "crisis_warning": "If you are in danger or have thoughts of harming yourself/others, contact emergency services, a crisis line or someone nearby.",

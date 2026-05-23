@@ -33,6 +33,13 @@ def test_as_your_therapist_blocked() -> None:
     assert reason == "identity_claim"
 
 
+def test_russian_psychologist_self_claim_blocked() -> None:
+    """V-2c: Russian bot self-description as a psychologist is blocked."""
+    safe, reason = validate_support_response("Привет! Меня зовут Мария, я психолог.")
+    assert safe is False
+    assert reason == "identity_claim"
+
+
 # ── V-3: diagnosis language blocks ────────────────────────────────────────────
 
 def test_diagnosis_blocked() -> None:
@@ -100,10 +107,11 @@ async def test_chat_handler_sends_output_blocked_message() -> None:
     mock_classifier.classify = AsyncMock(return_value=mock_classification)
 
     with (
-        patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
-        patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
-        patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
-    ):
+            patch("app.bot.handlers.chat.has_consent", new_callable=AsyncMock, return_value=True),
+            patch("app.bot.handlers.chat.get_user_by_telegram_id", new_callable=AsyncMock, return_value=None),
+            patch("app.bot.handlers.chat.OpenRouterClient", return_value=mock_client),
+            patch("app.bot.handlers.chat.SafetyClassifier", return_value=mock_classifier),
+        ):
         await handle_message(msg)
 
     msg.answer.assert_called_once()

@@ -49,6 +49,12 @@ router = Router()
 _history: dict[int, list[dict[str, str]]] = {}
 _MAX_HISTORY = 20  # 10 exchanges
 
+# Exchange counter for friendly-chat feedback throttling.
+# Feedback buttons break conversational flow when shown every turn —
+# so in friendly mode we show them only every _FEEDBACK_EVERY_N exchanges.
+_friendly_exchange_count: dict[int, int] = {}
+_FEEDBACK_EVERY_N = 5
+
 
 def _get_history(user_id: int) -> list[dict[str, str]]:
     return _history.get(user_id, [])
@@ -60,6 +66,26 @@ def _record_exchange(user_id: int, user_text: str, bot_reply: str) -> None:
     h.append({"role": "assistant", "content": bot_reply})
     if len(h) > _MAX_HISTORY:
         _history[user_id] = h[-_MAX_HISTORY:]
+
+
+def _friendly_reply_keyboard(user_id: int, lang: str) -> types.InlineKeyboardMarkup | None:
+    """No inline keyboard most turns — chat looks like a real conversation.
+
+    Full feedback keyboard surfaces every N-th turn so we still collect ratings
+    without interrupting the flow on every message.
+    """
+    count = _friendly_exchange_count.get(user_id, 0) + 1
+    _friendly_exchange_count[user_id] = count
+    feedback_due = count > 0 and count % _FEEDBACK_EVERY_N == 0
+    logger.info(
+        "stage=friendly_keyboard_policy turn_count=%d inline_markup=%s feedback_due=%s",
+        count,
+        feedback_due,
+        feedback_due,
+    )
+    if feedback_due:
+        return feedback_keyboard(lang)
+    return None
 
 
 def _build_context_str(user_id: int) -> str:
@@ -113,6 +139,17 @@ async def _keep_typing(message: types.Message) -> None:
         await asyncio.sleep(4)
 
 
+
+async def _transcribe_voice_for_chat(message: types.Message) -> str | None:
+    """Transcribe Telegram voice using the existing voice_transcription module."""
+    from app.ai.voice_transcription import transcribe_voice
+
+    result = await transcribe_voice(message.voice, message.bot)
+    if result:
+        return str(result).strip()
+    return None
+
+
 @router.message(Command("chat"))
 async def cmd_chat(message: types.Message) -> None:
     lang = get_user_language(message.from_user)
@@ -121,11 +158,25 @@ async def cmd_chat(message: types.Message) -> None:
 
 @router.message()
 async def handle_message(message: types.Message) -> None:
-    if not message.text:
-        return
-
     lang = get_user_language(message.from_user)
-    user_text = message.text.strip()
+
+    if message.text:
+        user_text = message.text.strip()
+    elif message.voice:
+        try:
+            await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
+            user_text = await _transcribe_voice_for_chat(message)
+            logger.info("stage=voice_handler transcript_chars=%d", len(user_text or ""))
+        except Exception:
+            logger.exception("stage=voice_handler status=failed")
+            await message.answer(get_text("chat.error", lang))
+            return
+        if not user_text:
+            logger.warning("stage=voice_handler status=empty_transcript")
+            await message.answer(get_text("chat.error", lang))
+            return
+    else:
+        return
     msg_lang = detect_language(user_text)
 
     # Step 1: Deterministic crisis check (runs before consent — no external calls)
@@ -353,6 +404,11 @@ async def handle_message(message: types.Message) -> None:
             "gender": getattr(db_user, "gender", None),
             "region": country,
         }
+    logger.info(
+        "stage=friendly_mode_detected value=%s effective_mode=%s",
+        user_mode == MODE_FRIENDLY_CHAT,
+        user_mode or "pipeline",
+    )
 
     history = _get_history(message.from_user.id)
     # Only compute HMAC IDs when Langfuse is active; avoids work and salt access otherwise.
@@ -406,7 +462,11 @@ async def handle_message(message: types.Message) -> None:
                 )
             else:
                 _record_exchange(message.from_user.id, user_text, result.content)
-                await message.answer(result.content, reply_markup=feedback_keyboard(lang))
+                if get_mode(message.from_user.id) == MODE_FRIENDLY_CHAT:
+                    kb = _friendly_reply_keyboard(message.from_user.id, lang)
+                else:
+                    kb = feedback_keyboard(lang)
+                await message.answer(result.content, reply_markup=kb)
         except Exception:
             await message.answer(
                 get_text("chat.error", lang), reply_markup=_back_to_menu_kb(lang)

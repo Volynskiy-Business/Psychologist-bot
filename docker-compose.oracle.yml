@@ -18,6 +18,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    networks:
+      - default
+      - postgres_net
     volumes:
       - ./data:/app/data
     ports:
@@ -115,3 +118,8 @@ volumes:
   redis_data:
   prometheus_data:
   grafana_data:
+
+networks:
+  postgres_net:
+    external: true
+    name: psychologist-bot_default

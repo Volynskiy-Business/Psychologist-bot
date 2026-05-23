@@ -16,6 +16,7 @@ services:
       redis:
         condition: service_started
     volumes:
+      - ./app:/app/app
       - ./data:/app/data
       - ./alembic.ini:/app/alembic.ini
       - ./alembic:/app/alembic

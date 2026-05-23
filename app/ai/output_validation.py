@@ -22,6 +22,27 @@ _BLOCKED_PATTERNS: list[tuple[re.Pattern, str]] = [
         ),
         "identity_claim",
     ),
+    (
+        re.compile(
+            r"\bя\s+(?:ваш|твой|твоя)?\s*(?:врач|психолог|психотерапевт|психиатр|клинический\s+специалист)\b",
+            re.I,
+        ),
+        "identity_claim",
+    ),
+    (
+        re.compile(
+            r"\bменя\s+зовут\s+[^.!?\n]{0,60},\s*я\s+(?:врач|психолог|психотерапевт|психиатр|клинический\s+специалист)\b",
+            re.I,
+        ),
+        "identity_claim",
+    ),
+    (
+        re.compile(
+            r"\bкак\s+(?:ваш|твой|твоя)\s+(?:врач|психолог|психотерапевт|психиатр)\b",
+            re.I,
+        ),
+        "identity_claim",
+    ),
     # Diagnosis — asserting the user has a named condition
     (
         re.compile(
