@@ -17,6 +17,13 @@ class Settings(BaseSettings):
     bot_token: SecretStr = Field(..., alias="BOT_TOKEN")
     bot_display_name: str = Field("PsySupport AI", alias="BOT_DISPLAY_NAME")
 
+    # STT / Voice transcription
+    groq_api_key: SecretStr | None = Field(None, alias="GROQ_API_KEY")
+    stt_groq_model: str = Field("whisper-large-v3-turbo", alias="STT_GROQ_MODEL")
+    stt_fallback_provider: str = Field("", alias="STT_FALLBACK_PROVIDER")
+    deepgram_api_key: SecretStr | None = Field(None, alias="DEEPGRAM_API_KEY")
+    stt_deepgram_model: str = Field("nova-2", alias="STT_DEEPGRAM_MODEL")
+
     # OpenRouter
     openrouter_api_key: SecretStr = Field(..., alias="OPENROUTER_API_KEY")
     openrouter_base_url: str = Field(
@@ -50,6 +57,10 @@ class Settings(BaseSettings):
     app_env: str = Field("development", alias="APP_ENV")
     log_level: str = Field("INFO", alias="LOG_LEVEL")
     allow_free_models: bool = Field(False, alias="ALLOW_FREE_MODELS")
+
+    # Speech-to-text fallback
+    stt_fallback_provider: str = Field("", alias="STT_FALLBACK_PROVIDER")
+    deepgram_api_key: SecretStr = Field("", alias="DEEPGRAM_API_KEY")
 
     # Langfuse (optional LLM observability — disabled if keys not set)
     langfuse_public_key: str = Field("", alias="LANGFUSE_PUBLIC_KEY")

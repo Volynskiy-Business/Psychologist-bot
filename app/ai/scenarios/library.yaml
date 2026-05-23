@@ -516,6 +516,24 @@ scenarios:
     escalation_rules:
       - "If user expresses hopelessness about ever connecting again → escalate to Tier 2"
       - "If betrayal grief includes loss of will to live → escalate to Tier 3"
+    talk_mode_guidance:
+      style_target: "companionship first, reflection second, guidance only if invited"
+      anti_patterns:
+        - "Do not start with 'I'm so sorry to hear that' — too generic"
+        - "Do not list multiple emotions ('loss, emptiness, confusion') — pick one concrete word"
+        - "Do not ask 'How does that make you feel?' — too clinical"
+        - "Do not end every turn with a question — sometimes just stay with them"
+        - "Do not reframe or find silver linings until user invites it"
+      example_turns:
+        - user: "мой развод с женой после 19 лет брака"
+          good: "19 лет — это не просто отношения, это целая часть жизни. Что сейчас больнее всего: одиночество, или что-то ещё?"
+          bad: "19 лет брака — это огромный отрезок жизни, целая эпоха. Чувство утраты, опустошения, растерянности — всё это совершенно понятно."
+        - user: "пережить его..."
+          good: "Да. По одному шагу. Ты не один в этом."
+          bad: "Пережить — это действительно главная задача сейчас. Это долгий и непростой путь, и совершенно нормально чувствовать себя так."
+        - user: "I'm going through a divorce after 19 years"
+          good: "Nineteen years is a whole chapter of life. What part feels heaviest right now — the loneliness, the shock, or the fear of what comes next?"
+          bad: "I understand how difficult this must be. It's completely normal to feel loss, confusion, and grief after such a long relationship."
 
   - id: death_of_loved_one
     title: "Потеря близкого человека / Горе утраты"
